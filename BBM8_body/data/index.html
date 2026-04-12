@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ROBOT CONTROL</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;600;900&display=swap');
+
+  :root {
+    --bg:       #0a0c0f;
+    --panel:    #111318;
+    --border:   #1e2330;
+    --accent:   #00e5ff;
+    --warn:     #ff6b35;
+    --ok:       #39ff14;
+    --text:     #c8d0e0;
+    --dim:      #4a5568;
+    --roll:     #00e5ff;
+    --pitch:    #ff6b35;
+    --err:      #ff3864;
+    --der:      #a78bfa;
+    --int:      #39ff14;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    overflow-x: hidden;
+  }
+
+  /* Scanline overlay */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.15) 2px,
+      rgba(0,0,0,0.15) 4px
+    );
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  /* ── HEADER ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel);
+  }
+
+  .logo {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 1.6rem;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+  .logo span { color: var(--dim); font-weight: 300; }
+
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    color: var(--dim);
+  }
+
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--err);
+    box-shadow: 0 0 6px var(--err);
+    transition: all 0.3s;
+  }
+  .status-dot.live {
+    background: var(--ok);
+    box-shadow: 0 0 8px var(--ok);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; } 50% { opacity: 0.5; }
+  }
+
+  #hz-counter { color: var(--accent); }
+
+  /* ── MAIN GRID ── */
+  main {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    grid-template-rows: auto auto;
+    gap: 1px;
+    background: var(--border);
+    padding: 1px;
+  }
+
+  .panel {
+    background: var(--panel);
+    padding: 20px;
+  }
+
+  /* ── GRAPH PANEL ── */
+  .graph-panel {
+    grid-row: 1 / 3;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: var(--border);
+    padding: 0;
+  }
+
+  .graph-block {
+    background: var(--panel);
+    padding: 16px 20px;
+    flex: 1;
+  }
+
+  .graph-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--dim);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  .graph-label .current-val {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1.1rem;
+    letter-spacing: 0;
+  }
+
+  canvas {
+    width: 100%;
+    height: 80px;
+    display: block;
+  }
+
+  /* ── READOUTS ── */
+  .readouts-panel {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    padding: 0;
+  }
+
+  .readout {
+    background: var(--panel);
+    padding: 16px;
+    text-align: center;
+  }
+
+  .readout-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    color: var(--dim);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .readout-value {
+    font-size: 1.6rem;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    line-height: 1;
+  }
+
+  .readout-unit {
+    font-size: 0.6rem;
+    color: var(--dim);
+    margin-top: 2px;
+  }
+
+  /* ── CONTROLS PANEL ── */
+  .controls-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: var(--border);
+    padding: 0;
+  }
+
+  .control-block {
+    background: var(--panel);
+    padding: 18px 20px;
+  }
+
+  .control-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--dim);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .input-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .input-row label {
+    font-size: 0.75rem;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    min-width: 28px;
+  }
+
+  .input-row input[type="number"] {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    padding: 5px 8px;
+    width: 110px;
+    text-align: right;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .input-row input[type="number"]:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
+  }
+
+  /* Remove spinners */
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+  input[type=number] { -moz-appearance: textfield; }
+
+  .btn {
+    width: 100%;
+    padding: 8px;
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: all 0.15s;
+  }
+  .btn:hover {
+    background: var(--accent);
+    color: var(--bg);
+  }
+  .btn:active { opacity: 0.7; }
+
+  .btn-warn {
+    border-color: var(--warn);
+    color: var(--warn);
+  }
+  .btn-warn:hover {
+    background: var(--warn);
+    color: var(--bg);
+  }
+
+  /* Flash feedback */
+  .flash {
+    animation: flashAnim 0.4s ease;
+  }
+  @keyframes flashAnim {
+    0%   { background: rgba(0,229,255,0.15); }
+    100% { background: var(--panel); }
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 8px 24px;
+    border-top: 1px solid var(--border);
+    background: var(--panel);
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.6rem;
+    color: var(--dim);
+    letter-spacing: 0.1em;
+  }
+
+  #log {
+    color: var(--ok);
+    transition: opacity 0.5s;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">ROBOT <span>// CONTROL PANEL</span></div>
+  <div class="status-bar">
+    <div class="status-dot" id="status-dot"></div>
+    <span id="status-text">DISCONNECTED</span>
+    <span>|</span>
+    <span id="hz-counter">-- Hz</span>
+  </div>
+</header>
+
+<main>
+
+  <!-- LEFT: graphs -->
+  <div class="graph-panel">
+    <div class="graph-block">
+      <div class="graph-label">
+        <span>ROLL</span>
+        <span class="current-val" id="val-roll" style="color:var(--roll)">--.-°</span>
+      </div>
+      <canvas id="c-roll"></canvas>
+    </div>
+    <div class="graph-block">
+      <div class="graph-label">
+        <span>PITCH</span>
+        <span class="current-val" id="val-pitch" style="color:var(--pitch)">--.-°</span>
+      </div>
+      <canvas id="c-pitch"></canvas>
+    </div>
+    <div class="graph-block">
+      <div class="graph-label">
+        <span>PID ERROR</span>
+        <span class="current-val" id="val-err" style="color:var(--err)">--.-</span>
+      </div>
+      <canvas id="c-err"></canvas>
+    </div>
+    <div class="graph-block">
+      <div class="graph-label">
+        <span>DERIVATIVE</span>
+        <span class="current-val" id="val-der" style="color:var(--der)">--.-</span>
+      </div>
+      <canvas id="c-der"></canvas>
+    </div>
+  </div>
+
+  <!-- RIGHT TOP: numeric readouts -->
+  <div class="readouts-panel panel" style="padding:0">
+    <div class="readout">
+      <div class="readout-label">Roll</div>
+      <div class="readout-value" id="r-roll" style="color:var(--roll)">---</div>
+      <div class="readout-unit">degrees</div>
+    </div>
+    <div class="readout">
+      <div class="readout-label">Pitch</div>
+      <div class="readout-value" id="r-pitch" style="color:var(--pitch)">---</div>
+      <div class="readout-unit">degrees</div>
+    </div>
+    <div class="readout">
+      <div class="readout-label">Error</div>
+      <div class="readout-value" id="r-err" style="color:var(--err)">---</div>
+      <div class="readout-unit">deg</div>
+    </div>
+    <div class="readout">
+      <div class="readout-label">Integral</div>
+      <div class="readout-value" id="r-int" style="color:var(--int)">---</div>
+      <div class="readout-unit">deg·s</div>
+    </div>
+  </div>
+
+  <!-- RIGHT BOTTOM: controls -->
+  <div class="controls-panel">
+
+    <div class="control-block">
+      <div class="control-title">Target Roll</div>
+      <div class="input-row">
+        <label>°</label>
+        <input type="number" id="inp-target" value="0" step="0.5">
+      </div>
+      <button class="btn btn-warn" onclick="sendTarget()">SEND TARGET</button>
+    </div>
+
+    <div class="control-block">
+      <div class="control-title">PID Gains</div>
+      <div class="input-row">
+        <label>Kp</label>
+        <input type="number" id="inp-kp" value="1.00" step="0.05">
+      </div>
+      <div class="input-row">
+        <label>Ki</label>
+        <input type="number" id="inp-ki" value="0.00" step="0.01">
+      </div>
+      <div class="input-row">
+        <label>Kd</label>
+        <input type="number" id="inp-kd" value="0.05" step="0.005">
+      </div>
+      <button class="btn" onclick="sendGains()">APPLY GAINS</button>
+    </div>
+
+  </div>
+
+</main>
+
+<footer>
+  <span>ws://192.168.4.1:81</span>
+  <span id="log">READY</span>
+  <span id="pkt-count">PKT: 0</span>
+</footer>
+
+<script>
+  // ── WebSocket ──
+  const WS_URL = 'ws://192.168.4.1:81';
+  let ws, reconnectTimer;
+  let pktCount = 0;
+
+  // Hz tracking
+  let lastPktTime = 0, hzBuffer = [];
+
+  function connect() {
+    ws = new WebSocket(WS_URL);
+
+    ws.onopen = () => {
+      setStatus(true);
+      log('CONNECTED');
+      clearTimeout(reconnectTimer);
+    };
+
+    ws.onclose = () => {
+      setStatus(false);
+      log('DISCONNECTED — retrying...');
+      reconnectTimer = setTimeout(connect, 2000);
+    };
+
+    ws.onerror = () => {
+      ws.close();
+    };
+
+    ws.onmessage = (e) => {
+      try {
+        const d = JSON.parse(e.data);
+        updateTelemetry(d);
+        trackHz();
+        pktCount++;
+        document.getElementById('pkt-count').textContent = 'PKT: ' + pktCount;
+      } catch {}
+    };
+  }
+
+  function setStatus(live) {
+    document.getElementById('status-dot').classList.toggle('live', live);
+    document.getElementById('status-text').textContent = live ? 'LIVE' : 'DISCONNECTED';
+  }
+
+  function log(msg) {
+    const el = document.getElementById('log');
+    el.textContent = msg;
+    el.style.opacity = 1;
+  }
+
+  function trackHz() {
+    const now = performance.now();
+    if (lastPktTime) hzBuffer.push(1000 / (now - lastPktTime));
+    if (hzBuffer.length > 20) hzBuffer.shift();
+    lastPktTime = now;
+    if (hzBuffer.length > 1) {
+      const avg = hzBuffer.reduce((a,b)=>a+b,0) / hzBuffer.length;
+      document.getElementById('hz-counter').textContent = avg.toFixed(1) + ' Hz';
+    }
+  }
+
+  // ── Graphs ──
+  const GRAPH_LEN = 150;
+  const graphs = {
+    roll:  { canvas: 'c-roll',  val: 'val-roll',  color: '#00e5ff', data: [], range: 45 },
+    pitch: { canvas: 'c-pitch', val: 'val-pitch', color: '#ff6b35', data: [], range: 45 },
+    err:   { canvas: 'c-err',   val: 'val-err',   color: '#ff3864', data: [], range: 30 },
+    der:   { canvas: 'c-der',   val: 'val-der',   color: '#a78bfa', data: [], range: 50 },
+  };
+
+  function initCanvases() {
+    Object.values(graphs).forEach(g => {
+      const canvas = document.getElementById(g.canvas);
+      canvas.width  = canvas.offsetWidth  * devicePixelRatio;
+      canvas.height = canvas.offsetHeight * devicePixelRatio;
+    });
+  }
+
+  function drawGraph(g, key) {
+    const canvas = document.getElementById(g.canvas);
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+
+    ctx.clearRect(0, 0, W, H);
+
+    // Zero line
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, H/2); ctx.lineTo(W, H/2);
+    ctx.stroke();
+
+    if (g.data.length < 2) return;
+
+    // Gradient fill
+    const grad = ctx.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0, g.color + '44');
+    grad.addColorStop(1, g.color + '00');
+
+    ctx.beginPath();
+    g.data.forEach((v, i) => {
+      const x = (i / (GRAPH_LEN - 1)) * W;
+      const y = H/2 - (v / g.range) * (H/2) * 0.85;
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    // Fill down
+    const lastX = ((g.data.length-1) / (GRAPH_LEN-1)) * W;
+    ctx.lineTo(lastX, H/2);
+    ctx.lineTo(0, H/2);
+    ctx.closePath();
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // Line
+    ctx.beginPath();
+    g.data.forEach((v, i) => {
+      const x = (i / (GRAPH_LEN - 1)) * W;
+      const y = H/2 - (v / g.range) * (H/2) * 0.85;
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.strokeStyle = g.color;
+    ctx.lineWidth = 1.5 * devicePixelRatio;
+    ctx.stroke();
+  }
+
+  function updateTelemetry(d) {
+    const map = { roll: d.roll, pitch: d.pitch, err: d.err, der: d.der };
+    Object.entries(map).forEach(([key, val]) => {
+      const g = graphs[key];
+      const v = parseFloat(val);
+      g.data.push(v);
+      if (g.data.length > GRAPH_LEN) g.data.shift();
+      drawGraph(g, key);
+      document.getElementById(g.val).textContent = v.toFixed(1) + (key==='roll'||key==='pitch' ? '°' : '');
+    });
+
+    // Numeric readouts
+    document.getElementById('r-roll').textContent  = parseFloat(d.roll).toFixed(2);
+    document.getElementById('r-pitch').textContent = parseFloat(d.pitch).toFixed(2);
+    document.getElementById('r-err').textContent   = parseFloat(d.err).toFixed(2);
+    document.getElementById('r-int').textContent   = parseFloat(d.int).toFixed(3);
+  }
+
+  // ── Commands ──
+  function send(obj) {
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
+      log('NOT CONNECTED');
+      return;
+    }
+    ws.send(JSON.stringify(obj));
+  }
+
+  function sendTarget() {
+    const t = parseFloat(document.getElementById('inp-target').value);
+    send({ target: t });
+    log('TARGET → ' + t.toFixed(1) + '°');
+    flash('inp-target');
+  }
+
+  function sendGains() {
+    const kp = parseFloat(document.getElementById('inp-kp').value);
+    const ki = parseFloat(document.getElementById('inp-ki').value);
+    const kd = parseFloat(document.getElementById('inp-kd').value);
+    send({ kp, ki, kd });
+    log('GAINS → Kp:' + kp + ' Ki:' + ki + ' Kd:' + kd);
+    flash('inp-kp'); flash('inp-ki'); flash('inp-kd');
+  }
+
+  function flash(id) {
+    const el = document.getElementById(id).parentElement;
+    el.classList.remove('flash');
+    void el.offsetWidth;
+    el.classList.add('flash');
+  }
+
+  // ── Init ──
+  window.addEventListener('load', () => {
+    initCanvases();
+    connect();
+  });
+  window.addEventListener('resize', initCanvases);
+</script>
+</body>
+</html>
