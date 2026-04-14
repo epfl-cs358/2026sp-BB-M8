@@ -17,10 +17,13 @@ float PIDController::compute(float setpoint, float measurement, float dt) {
 
     // -- Integral (with anti-windup clamping) --
     _integral += error * dt;
-    float I = _ki * _integral;
+    if (_ki != 0.0f) {
+        _integral = clamp(_integral, _outMin / _ki, _outMax / _ki);
+    }else{
+        _integral = 0.0f;  // No integral if  ki = 0
+    }
+    const float I = _ki * _integral;
 
-    // Anti-windup for integral term
-    I = clamp(I, _outMin, _outMax);
     // Back-calculate clamped integral state
     if (_ki != 0.0f) _integral = I / _ki;
 

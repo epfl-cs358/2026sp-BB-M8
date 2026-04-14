@@ -19,10 +19,8 @@ void Telemetry::begin() {
         return;
     }
 
-    // Serve dashboard from SPIFFS on GET /
-    _http.on("/", HTTP_GET, [](AsyncWebServerRequest* req) {
-        req->send(SPIFFS, "/index.html", "text/html");
-    });
+    // Serve dashboard from SPIFFS
+    _http.serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
     _http.begin();
 
     // Start WebSocket server
@@ -67,6 +65,7 @@ void Telemetry::webSocketEvent(uint8_t num, WStype_t type,
     switch (type) {
         case WStype_CONNECTED:
             _clientCount++;
+            Serial.printf("[WS] Client #%d connected\n", num);
             break;
         case WStype_DISCONNECTED:
             if (_clientCount > 0) _clientCount--;

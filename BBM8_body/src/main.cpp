@@ -77,5 +77,12 @@ void loop() {
             rollCtrl.pid().getIntegral(),
             rollCtrl.pid().getLastDerivative()
         );
+
+        // Serial print for debugging
+        // Serial.printf("Roll: %6.2f°, Pitch: %6.2f°, Err: %6.2f, Int: %6.2f, Der: %6.2f\n",
+        //               state.getRoll(), state.getPitch(),
+        //               rollCtrl.pid().getLastError(),
+        //               rollCtrl.pid().getIntegral(),
+        //               rollCtrl.pid().getLastDerivative());
     }
 }
