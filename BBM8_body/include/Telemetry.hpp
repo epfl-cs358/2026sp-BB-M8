@@ -40,8 +40,14 @@ public:
      */
     void update();
 
-    void sendTelemetry(float roll, float pitch,
-                       float err, float integral, float derivative);
+    void sendTelemetry(
+        float roll,
+        float pitch,
+        float target,
+        float output,
+        float err,
+        float integral,
+        float derivative);
 
     void onTargetChanged(void (*callback)(float targetDeg)) {
         _onTarget = callback;

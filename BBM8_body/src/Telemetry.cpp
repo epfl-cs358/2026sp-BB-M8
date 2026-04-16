@@ -32,18 +32,26 @@ void Telemetry::update() {
     _ws.loop();
 }
 
-void Telemetry::sendTelemetry(float roll, float pitch,
-                               float err, float integral, float derivative) {
+void Telemetry::sendTelemetry(float roll,   float pitch,
+                               float target, float pidOutput,
+                               float err,    float integral, float derivative) {
     if (_clientCount == 0) return;
-
-    StaticJsonDocument<128> doc;
-    doc["roll"]  = serialized(String(roll,       2));
-    doc["pitch"] = serialized(String(pitch,      2));
-    doc["err"]   = serialized(String(err,        2));
-    doc["int"]   = serialized(String(integral,   2));
-    doc["der"]   = serialized(String(derivative, 2));
-
-    char buffer[128];
+ 
+    // Two nested objects: "state" and "pid"
+    StaticJsonDocument<192> doc;
+ 
+    JsonObject state = doc.createNestedObject("state");
+    state["roll"]  = serialized(String(roll,  2));
+    state["pitch"] = serialized(String(pitch, 2));
+ 
+    JsonObject pid = doc.createNestedObject("pid");
+    pid["target"] = serialized(String(target,     2));
+    pid["output"] = serialized(String(pidOutput,  2));
+    pid["err"]    = serialized(String(err,        2));
+    pid["int"]    = serialized(String(integral,   2));
+    pid["der"]    = serialized(String(derivative, 2));
+ 
+    char buffer[192];
     serializeJson(doc, buffer);
     _ws.broadcastTXT(buffer);
 }

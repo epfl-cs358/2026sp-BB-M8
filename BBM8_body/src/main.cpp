@@ -71,8 +71,12 @@ void loop() {
 
         // Telemetry over WebSocket
         telemetry.sendTelemetry(
+            // State Estimator
             state.getRoll(),
             state.getPitch(),
+            // PID
+            rollCtrl.getTarget(),
+            rollCtrl.pid().getLastOutput(),
             rollCtrl.pid().getLastError(),
             rollCtrl.pid().getIntegral(),
             rollCtrl.pid().getLastDerivative()

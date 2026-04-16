@@ -42,6 +42,7 @@ public:
     float getLastError()      const { return _lastError; }
     float getIntegral()       const { return _integral;  }
     float getLastDerivative() const { return _derivative; }
+    float getLastOutput()     const { return _lastOutput; }
 
 private:
     float _kp, _ki, _kd;
@@ -49,6 +50,7 @@ private:
     float _integral;
     float _lastError;
     float _derivative;
+    float _lastOutput;
 
     float clamp(float value, float minVal, float maxVal);
 };

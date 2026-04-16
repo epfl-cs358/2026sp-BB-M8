@@ -34,7 +34,11 @@ float PIDController::compute(float setpoint, float measurement, float dt) {
 
     _lastError = error;
 
-    return clamp(P + I + D, _outMin, _outMax);
+    float output = clamp(P + I + D, _outMin, _outMax);
+
+    _lastOutput = output;
+
+    return output;
 }
 
 void PIDController::reset() {
