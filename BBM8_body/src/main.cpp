@@ -14,7 +14,7 @@ constexpr float KD_ROLL = 0.05f;
 
 // ---- Complementary filter coefficient (!!! TO TUNE !!!) ----
 // 0.98 = trust gyro 98% short-term, correct with accel 2% long-term
-constexpr float ALPHA = 0.98f;
+constexpr float ALPHA = 0.95f;
 
 // ---- WiFi hotspot credentials ----
 constexpr char WIFI_SSID[] = "BBM8-body";
