@@ -1,16 +1,25 @@
 #include <Arduino.h>
 #include "StateEstimator.hpp"
 #include "RollController.hpp"
+#include "DriveController.hpp"
 #include "Telemetry.hpp"
 
 // ---- Config ----
 constexpr int      SERVO_PIN = 18;      // GPIO pin connected to servo signal wire
 constexpr uint32_t LOOP_MS   = 20;      // 50 Hz control loop
 
-// ---- PID gains (!!! TO TUNE !!!) ---- 
+// ---- Roll PID gains (!!! TO TUNE !!!) ---- 
 constexpr float KP_ROLL = 1.0f;
 constexpr float KI_ROLL = 0.0f;
 constexpr float KD_ROLL = 0.05f;
+
+// ---- Drive PID gains (!!! TO TUNE !!!) ---- 
+constexpr float KP_DRIVE = 1.0f;
+constexpr float KI_DRIVE = 0.0f;
+constexpr float KD_DRIVE = 0.05f;
+
+// Max stepper speed in steps/second
+constexpr float MAX_STEPPER_SPEED = 400.0f;
 
 // ---- Complementary filter coefficient (!!! TO TUNE !!!) ----
 // 0.98 = trust gyro 98% short-term, correct with accel 2% long-term
@@ -23,6 +32,7 @@ constexpr char WIFI_PASS[] = "starwars";
 // ---- Module instances ----
 StateEstimator state(ALPHA);
 RollController rollCtrl(KP_ROLL, KI_ROLL, KD_ROLL, SERVO_PIN);
+DriveController driveCtrl(KP_DRIVE, KI_DRIVE, KD_DRIVE, MAX_STEPPER_SPEED);
 Telemetry      telemetry(WIFI_SSID, WIFI_PASS);
 
 uint32_t lastTime = 0;
@@ -38,6 +48,8 @@ void setup() {
 
     rollCtrl.begin();
     Serial.println("[OK] RollController ready.");
+    driveCtrl.begin();
+    Serial.println("[OK] DriveController ready.");
 
     // Register callbacks for incoming commands
     telemetry.onTargetChanged([](float targetDeg) {
@@ -68,6 +80,7 @@ void loop() {
 
         // Control
         rollCtrl.update(state.getRoll(), dt);
+        driveCtrl.update(state.getPitch(), dt);
 
         // Telemetry over WebSocket
         telemetry.sendTelemetry(
