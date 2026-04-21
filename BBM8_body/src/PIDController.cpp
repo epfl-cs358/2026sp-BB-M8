@@ -28,7 +28,7 @@ float PIDController::compute(float setpoint, float measurement, float dt) {
     if (_ki != 0.0f) _integral = I / _ki;
 
     // -- Derivative (on measurement) --
-    _derivative = -(measurement - (_lastError == 0.0f ? measurement : (setpoint - _lastError))) / dt;
+    _derivative = (measurement - (_lastError == 0.0f ? measurement : (setpoint - _lastError))) / dt;
     
     const float D = _kd * _derivative;
 

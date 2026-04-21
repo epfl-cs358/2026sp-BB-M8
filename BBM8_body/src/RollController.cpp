@@ -1,7 +1,7 @@
 #include "RollController.hpp"
 
 RollController::RollController(float kp, float ki, float kd, int servoPin)
-    : _pid(kp, ki, kd, -90.0f, 90.0f),
+    : _pid(kp, ki, kd, -45.0f, 45.0f),
       _servoPin(servoPin),
       _targetDeg(0.0f)
 {}
