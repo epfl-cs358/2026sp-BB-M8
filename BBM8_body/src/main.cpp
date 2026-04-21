@@ -5,8 +5,10 @@
 #include "Telemetry.hpp"
 
 // ---- Config ----
-constexpr int      SERVO_PIN = 18;      // GPIO pin connected to servo signal wire
-constexpr uint32_t LOOP_MS   = 20;      // 50 Hz control loop
+constexpr int SERVO_PIN = 18; // GPIO pin connected to servo signal wire
+constexpr int STEP_PIN = 25; // GPIO pin connected to A4988 STEP
+constexpr int DIR_PIN  = 26; // GPIO pin connected to A4988 DIR
+constexpr uint32_t LOOP_MS = 20; // 50 Hz control loop
 
 // ---- Roll PID gains (!!! TO TUNE !!!) ---- 
 constexpr float KP_ROLL = 1.0f;
@@ -19,6 +21,7 @@ constexpr float KI_DRIVE = 0.0f;
 constexpr float KD_DRIVE = 0.05f;
 
 // Max stepper speed in steps/second
+// max robot speed = MAX_STEPPER_SPEED * 0.35m * PI / (200 (steps/rev) * 10 (gear ratio))
 constexpr float MAX_STEPPER_SPEED = 400.0f;
 
 // ---- Complementary filter coefficient (!!! TO TUNE !!!) ----
@@ -32,7 +35,7 @@ constexpr char WIFI_PASS[] = "starwars";
 // ---- Module instances ----
 StateEstimator state(ALPHA);
 RollController rollCtrl(KP_ROLL, KI_ROLL, KD_ROLL, SERVO_PIN);
-DriveController driveCtrl(KP_DRIVE, KI_DRIVE, KD_DRIVE, MAX_STEPPER_SPEED);
+DriveController driveCtrl(KP_DRIVE, KI_DRIVE, KD_DRIVE, MAX_STEPPER_SPEED, STEP_PIN, DIR_PIN);
 Telemetry      telemetry(WIFI_SSID, WIFI_PASS);
 
 uint32_t lastTime = 0;

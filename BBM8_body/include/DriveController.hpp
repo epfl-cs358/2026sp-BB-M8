@@ -21,9 +21,6 @@
  */
 class DriveController {
 public:
-    static constexpr int STEP_PIN = 25;
-    static constexpr int DIR_PIN  = 26;
-
     // TODO: set to match the A4988 MS1/MS2/MS3 jumper config
     // Full=200, Half=400, Quarter=800, Eighth=1600, Sixteenth=3200
     static constexpr int STEPS_PER_REV = 200;
@@ -38,7 +35,7 @@ public:
      * @param kp, ki, kd   Speed PID gains
      * @param maxSpeed     Maximum stepper speed in steps/second
      */
-    DriveController(float kp, float ki, float kd, float maxSpeed);
+    DriveController(float kp, float ki, float kd, float maxSpeed, int stepPin, int dirPin);
 
     /** Call once in setup(). */
     void begin();
@@ -63,6 +60,8 @@ private:
     PIDController _pid;
     AccelStepper  _stepper;
 
+    int _stepPin;
+    int _dirPin;
     float _maxSpeed;         // steps/second
     float _targetMPerSec;
     float _currentMPerSec;

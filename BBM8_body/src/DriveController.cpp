@@ -1,8 +1,15 @@
 #include "DriveController.hpp"
 
-DriveController::DriveController(float kp, float ki, float kd, float maxSpeed)
+DriveController::DriveController(
+    float kp,
+    float ki,
+    float kd,
+    float maxSpeed,
+    int stepPin,
+    int dirPin
+)
     : _pid(kp, ki, kd, -maxSpeed, maxSpeed),
-      _stepper(AccelStepper::DRIVER, STEP_PIN, DIR_PIN),
+      _stepper(AccelStepper::DRIVER, stepPin, dirPin),
       _maxSpeed(maxSpeed),
       _targetMPerSec(0.0f),
       _currentMPerSec(0.0f),
