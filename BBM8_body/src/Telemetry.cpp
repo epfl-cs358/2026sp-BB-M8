@@ -66,6 +66,9 @@ void Telemetry::handleMessage(uint8_t* payload, size_t length) {
     if (doc.containsKey("kp") && doc.containsKey("ki") &&
         doc.containsKey("kd") && _onGains)
         _onGains((float)doc["kp"], (float)doc["ki"], (float)doc["kd"]);
+
+    if (doc.containsKey("driveSpeed") && _onDriveSpeed)
+        _onDriveSpeed((float)doc["driveSpeed"]);
 }
 
 void Telemetry::webSocketEvent(uint8_t num, WStype_t type,

@@ -61,6 +61,9 @@ void setup() {
     telemetry.onGainsChanged([](float kp, float ki, float kd) {
         rollCtrl.pid().setGains(kp, ki, kd);
     });
+    telemetry.onDriveSpeedChanged([](float mPerSec) {
+        driveCtrl.setTargetSpeed(mPerSec);
+    });
     // Start the WiFi only after registering the callbacks
     telemetry.begin();
 
