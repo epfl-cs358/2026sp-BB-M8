@@ -106,7 +106,7 @@
   /* ── LEFT: two stacked sections ── */
   .left-col {
     display: grid;
-    grid-template-rows: 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
     gap: 1px;
     background: var(--border);
   }
@@ -138,6 +138,7 @@
   }
   .section-tag.state { color: var(--roll); border-color: var(--roll); }
   .section-tag.pid   { color: var(--output); border-color: var(--output); }
+  .section-tag.drive { color: var(--pitch); border-color: var(--pitch); }
 
   .section-desc {
     font-size: 0.65rem;
@@ -152,8 +153,9 @@
     background: var(--border);
     padding: 1px;
   }
-  .state-graphs { grid-template-columns: 1fr 1fr; }
-  .pid-graphs   { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .state-graphs  { grid-template-columns: 1fr 1fr; }
+  .pid-graphs    { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .drive-graphs  { grid-template-columns: 1fr 1fr 1fr 1fr 1fr; }
 
   .graph-block {
     background: var(--panel);
@@ -182,7 +184,7 @@
   /* ── RIGHT: readouts + controls ── */
   .right-col {
     display: grid;
-    grid-template-rows: auto auto 1fr;
+    grid-template-rows: auto auto auto 1fr;
     gap: 1px;
     background: var(--border);
   }
@@ -202,8 +204,9 @@
     padding-bottom: 6px;
     border-bottom: 1px solid var(--border);
   }
-  .readout-group-title.state { color: var(--roll); }
-  .readout-group-title.pid   { color: var(--output); }
+  .readout-group-title.state  { color: var(--roll); }
+  .readout-group-title.pid    { color: var(--output); }
+  .readout-group-title.drive  { color: var(--pitch); }
 
   .readout-grid {
     display: grid;
@@ -426,6 +429,51 @@
       </div>
     </div>
 
+    <!-- DRIVE PID section -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-tag drive">Drive Controller</span>
+        <span class="section-desc">Speed PID · Stepper Output</span>
+      </div>
+      <div class="graphs-row drive-graphs">
+        <div class="graph-block">
+          <div class="graph-label">
+            <span>SPEED</span>
+            <span class="cur" id="val-drive-speed" style="color:var(--pitch)">--.-</span>
+          </div>
+          <canvas id="c-drive-speed"></canvas>
+        </div>
+        <div class="graph-block">
+          <div class="graph-label">
+            <span>OUTPUT</span>
+            <span class="cur" id="val-drive-output" style="color:var(--output)">--.-</span>
+          </div>
+          <canvas id="c-drive-output"></canvas>
+        </div>
+        <div class="graph-block">
+          <div class="graph-label">
+            <span>ERROR</span>
+            <span class="cur" id="val-drive-err" style="color:var(--err)">--.-</span>
+          </div>
+          <canvas id="c-drive-err"></canvas>
+        </div>
+        <div class="graph-block">
+          <div class="graph-label">
+            <span>INTEGRAL</span>
+            <span class="cur" id="val-drive-int" style="color:var(--int)">--.-</span>
+          </div>
+          <canvas id="c-drive-int"></canvas>
+        </div>
+        <div class="graph-block">
+          <div class="graph-label">
+            <span>DERIVATIVE</span>
+            <span class="cur" id="val-drive-der" style="color:var(--der)">--.-</span>
+          </div>
+          <canvas id="c-drive-der"></canvas>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <!-- RIGHT COLUMN: readouts + controls -->
@@ -475,6 +523,33 @@
       </div>
     </div>
 
+    <!-- Drive readouts -->
+    <div class="readout-group">
+      <div class="readout-group-title drive">Drive Controller</div>
+      <div class="readout-grid">
+        <div class="readout">
+          <div class="readout-label">Speed</div>
+          <div class="readout-value" id="r-drive-speed" style="color:var(--pitch)">---</div>
+          <div class="readout-unit">m/s</div>
+        </div>
+        <div class="readout">
+          <div class="readout-label">Output</div>
+          <div class="readout-value" id="r-drive-output" style="color:var(--output)">---</div>
+          <div class="readout-unit">steps/s</div>
+        </div>
+        <div class="readout">
+          <div class="readout-label">Error</div>
+          <div class="readout-value" id="r-drive-err" style="color:var(--err)">---</div>
+          <div class="readout-unit">m/s</div>
+        </div>
+        <div class="readout">
+          <div class="readout-label">Integral</div>
+          <div class="readout-value" id="r-drive-int" style="color:var(--int)">---</div>
+          <div class="readout-unit">m</div>
+        </div>
+      </div>
+    </div>
+
     <!-- Controls -->
     <div class="controls-panel">
 
@@ -502,7 +577,7 @@
       </div>
 
       <div class="control-block">
-        <div class="control-title">PID Gains</div>
+        <div class="control-title">Roll PID Gains</div>
         <div class="input-row">
           <label>Kp</label>
           <input type="number" id="inp-kp" value="1.00" step="0.05">
@@ -515,7 +590,24 @@
           <label>Kd</label>
           <input type="number" id="inp-kd" value="0.05" step="0.005">
         </div>
-        <button class="btn" onclick="sendGains()">APPLY GAINS</button>
+        <button class="btn" onclick="sendRollGains()">APPLY ROLL GAINS</button>
+      </div>
+
+      <div class="control-block">
+        <div class="control-title">Drive PID Gains</div>
+        <div class="input-row">
+          <label>Kp</label>
+          <input type="number" id="inp-drive-kp" value="1.00" step="0.05">
+        </div>
+        <div class="input-row">
+          <label>Ki</label>
+          <input type="number" id="inp-drive-ki" value="0.00" step="0.01">
+        </div>
+        <div class="input-row">
+          <label>Kd</label>
+          <input type="number" id="inp-drive-kd" value="0.00" step="0.005">
+        </div>
+        <button class="btn" onclick="sendDriveGains()">APPLY DRIVE GAINS</button>
       </div>
 
     </div>
@@ -571,12 +663,17 @@
   // ── Graphs ──
   const GRAPH_LEN = 150;
   const graphs = {
-    roll:   { canvas:'c-roll',   val:'val-roll',   color:'#00e5ff', data:[], range:45  },
-    pitch:  { canvas:'c-pitch',  val:'val-pitch',  color:'#ff6b35', data:[], range:45  },
-    output: { canvas:'c-output', val:'val-output', color:'#ffd700', data:[], range:90  },
-    err:    { canvas:'c-err',    val:'val-err',    color:'#ff3864', data:[], range:45  },
-    int:    { canvas:'c-int',    val:'val-int',    color:'#39ff14', data:[], range:20  },
-    der:    { canvas:'c-der',    val:'val-der',    color:'#a78bfa', data:[], range:50  },
+    roll:        { canvas:'c-roll',         val:'val-roll',         color:'#00e5ff', data:[], range:45   },
+    pitch:       { canvas:'c-pitch',        val:'val-pitch',        color:'#ff6b35', data:[], range:45   },
+    output:      { canvas:'c-output',       val:'val-output',       color:'#ffd700', data:[], range:90   },
+    err:         { canvas:'c-err',          val:'val-err',          color:'#ff3864', data:[], range:45   },
+    int:         { canvas:'c-int',          val:'val-int',          color:'#39ff14', data:[], range:20   },
+    der:         { canvas:'c-der',          val:'val-der',          color:'#a78bfa', data:[], range:50   },
+    driveSpeed:  { canvas:'c-drive-speed',  val:'val-drive-speed',  color:'#ff6b35', data:[], range:1.0  },
+    driveOutput: { canvas:'c-drive-output', val:'val-drive-output', color:'#ffd700', data:[], range:400  },
+    driveErr:    { canvas:'c-drive-err',    val:'val-drive-err',    color:'#ff3864', data:[], range:1.0  },
+    driveInt:    { canvas:'c-drive-int',    val:'val-drive-int',    color:'#39ff14', data:[], range:5.0  },
+    driveDer:    { canvas:'c-drive-der',    val:'val-drive-der',    color:'#a78bfa', data:[], range:1.0  },
   };
 
   function initCanvases() {
@@ -629,7 +726,6 @@
     if (!d.state || !d.pid) return;
 
     // State estimator
-    const isAngle = { roll: true, pitch: true };
     ['roll','pitch'].forEach(k => {
       const v = parseFloat(d.state[k]);
       const g = graphs[k];
@@ -640,7 +736,7 @@
     document.getElementById('r-roll').textContent  = parseFloat(d.state.roll).toFixed(2);
     document.getElementById('r-pitch').textContent = parseFloat(d.state.pitch).toFixed(2);
 
-    // PID
+    // Roll PID
     ['output','err','int','der'].forEach(k => {
       const v = parseFloat(d.pid[k]);
       const g = graphs[k];
@@ -652,6 +748,22 @@
     document.getElementById('r-output').textContent = parseFloat(d.pid.output).toFixed(2);
     document.getElementById('r-err').textContent    = parseFloat(d.pid.err).toFixed(2);
     document.getElementById('r-int').textContent    = parseFloat(d.pid.int).toFixed(3);
+
+    // Drive PID
+    if (d.drive) {
+      const dm = { driveSpeed: d.drive.speed, driveOutput: d.drive.output, driveErr: d.drive.err, driveInt: d.drive.int, driveDer: d.drive.der };
+      Object.entries(dm).forEach(([k, raw]) => {
+        const v = parseFloat(raw);
+        const g = graphs[k];
+        g.data.push(v); if (g.data.length > GRAPH_LEN) g.data.shift();
+        drawGraph(g);
+        document.getElementById(g.val).textContent = v.toFixed(2);
+      });
+      document.getElementById('r-drive-speed').textContent  = parseFloat(d.drive.speed).toFixed(2);
+      document.getElementById('r-drive-output').textContent = parseFloat(d.drive.output).toFixed(1);
+      document.getElementById('r-drive-err').textContent    = parseFloat(d.drive.err).toFixed(2);
+      document.getElementById('r-drive-int').textContent    = parseFloat(d.drive.int).toFixed(3);
+    }
   }
 
   // ── Commands ──
@@ -691,13 +803,22 @@
     flash('inp-drive-speed');
   }
 
-  function sendGains() {
+  function sendRollGains() {
     const kp = parseFloat(document.getElementById('inp-kp').value);
     const ki = parseFloat(document.getElementById('inp-ki').value);
     const kd = parseFloat(document.getElementById('inp-kd').value);
-    send({ kp, ki, kd });
-    log('GAINS → Kp:' + kp + ' Ki:' + ki + ' Kd:' + kd);
+    send({ rollKp: kp, rollKi: ki, rollKd: kd });
+    log('ROLL GAINS → Kp:' + kp + ' Ki:' + ki + ' Kd:' + kd);
     flash('inp-kp'); flash('inp-ki'); flash('inp-kd');
+  }
+
+  function sendDriveGains() {
+    const kp = parseFloat(document.getElementById('inp-drive-kp').value);
+    const ki = parseFloat(document.getElementById('inp-drive-ki').value);
+    const kd = parseFloat(document.getElementById('inp-drive-kd').value);
+    send({ driveKp: kp, driveKi: ki, driveKd: kd });
+    log('DRIVE GAINS → Kp:' + kp + ' Ki:' + ki + ' Kd:' + kd);
+    flash('inp-drive-kp'); flash('inp-drive-ki'); flash('inp-drive-kd');
   }
 
   function flash(id) {

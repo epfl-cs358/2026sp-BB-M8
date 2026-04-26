@@ -63,8 +63,11 @@ void setup() {
     telemetry.onTargetChanged([](float targetDeg) {
         rollCtrl.setTarget(targetDeg);
     });
-    telemetry.onGainsChanged([](float kp, float ki, float kd) {
+    telemetry.onRollGainsChanged([](float kp, float ki, float kd) {
         rollCtrl.pid().setGains(kp, ki, kd);
+    });
+    telemetry.onDriveGainsChanged([](float kp, float ki, float kd) {
+        driveCtrl.pid().setGains(kp, ki, kd);
     });
     telemetry.onDriveSpeedChanged([](float mPerSec) {
         driveCtrl.setTargetSpeed(mPerSec);
@@ -113,12 +116,18 @@ void loop() {
             // State Estimator
             state.getRoll(),
             state.getPitch(),
-            // PID
+            // Roll PID
             rollCtrl.getTarget(),
             rollCtrl.pid().getLastOutput(),
             rollCtrl.pid().getLastError(),
             rollCtrl.pid().getIntegral(),
-            rollCtrl.pid().getLastDerivative()
+            rollCtrl.pid().getLastDerivative(),
+            // Drive PID
+            driveCtrl.getCurrentSpeed(),
+            driveCtrl.getLastOutput(),
+            driveCtrl.pid().getLastError(),
+            driveCtrl.pid().getIntegral(),
+            driveCtrl.pid().getLastDerivative()
         );
 
         // Serial print for debugging

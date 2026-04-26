@@ -41,19 +41,18 @@ public:
     void update();
 
     void sendTelemetry(
-        float roll,
-        float pitch,
-        float target,
-        float output,
-        float err,
-        float integral,
-        float derivative);
+        float roll,       float pitch,
+        float rollTarget, float rollOutput, float rollErr, float rollIntegral, float rollDerivative,
+        float driveSpeed, float driveOutput, float driveErr, float driveIntegral, float driveDerivative);
 
     void onTargetChanged(void (*callback)(float targetDeg)) {
         _onTarget = callback;
     }
-    void onGainsChanged(void (*callback)(float kp, float ki, float kd)) {
-        _onGains = callback;
+    void onRollGainsChanged(void (*callback)(float kp, float ki, float kd)) {
+        _onRollGains = callback;
+    }
+    void onDriveGainsChanged(void (*callback)(float kp, float ki, float kd)) {
+        _onDriveGains = callback;
     }
     void onDriveSpeedChanged(void (*callback)(float mPerSec)) {
         _onDriveSpeed = callback;
@@ -72,7 +71,8 @@ private:
     uint8_t          _clientCount;
 
     void (*_onTarget)(float targetDeg)             = nullptr;
-    void (*_onGains)(float kp, float ki, float kd) = nullptr;
+    void (*_onRollGains)(float kp, float ki, float kd)  = nullptr;
+    void (*_onDriveGains)(float kp, float ki, float kd) = nullptr;
     void (*_onDriveSpeed)(float mPerSec)           = nullptr;
     void (*_onStop)(bool stop)                     = nullptr;
 

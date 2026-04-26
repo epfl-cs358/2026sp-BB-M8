@@ -32,40 +32,51 @@ void Telemetry::update() {
     _ws.loop();
 }
 
-void Telemetry::sendTelemetry(float roll,   float pitch,
-                               float target, float pidOutput,
-                               float err,    float integral, float derivative) {
+void Telemetry::sendTelemetry(
+        float roll,       float pitch,
+        float rollTarget, float rollOutput, float rollErr, float rollIntegral, float rollDerivative,
+        float driveSpeed, float driveOutput, float driveErr, float driveIntegral, float driveDerivative) {
     if (_clientCount == 0) return;
- 
-    // Two nested objects: "state" and "pid"
-    StaticJsonDocument<192> doc;
- 
+
+    StaticJsonDocument<384> doc;
+
     JsonObject state = doc.createNestedObject("state");
     state["roll"]  = serialized(String(roll,  2));
     state["pitch"] = serialized(String(pitch, 2));
- 
+
     JsonObject pid = doc.createNestedObject("pid");
-    pid["target"] = serialized(String(target,     2));
-    pid["output"] = serialized(String(pidOutput,  2));
-    pid["err"]    = serialized(String(err,        2));
-    pid["int"]    = serialized(String(integral,   2));
-    pid["der"]    = serialized(String(derivative, 2));
- 
-    char buffer[192];
+    pid["target"] = serialized(String(rollTarget,    2));
+    pid["output"] = serialized(String(rollOutput,    2));
+    pid["err"]    = serialized(String(rollErr,       2));
+    pid["int"]    = serialized(String(rollIntegral,  2));
+    pid["der"]    = serialized(String(rollDerivative,2));
+
+    JsonObject drive = doc.createNestedObject("drive");
+    drive["speed"]  = serialized(String(driveSpeed,   2));
+    drive["output"] = serialized(String(driveOutput,  2));
+    drive["err"]    = serialized(String(driveErr,     2));
+    drive["int"]    = serialized(String(driveIntegral,2));
+    drive["der"]    = serialized(String(driveDerivative,2));
+
+    char buffer[384];
     serializeJson(doc, buffer);
     _ws.broadcastTXT(buffer);
 }
 
 void Telemetry::handleMessage(uint8_t* payload, size_t length) {
-    StaticJsonDocument<128> doc;
+    StaticJsonDocument<192> doc;
     if (deserializeJson(doc, payload, length)) return;
 
     if (doc.containsKey("target") && _onTarget)
         _onTarget((float)doc["target"]);
 
-    if (doc.containsKey("kp") && doc.containsKey("ki") &&
-        doc.containsKey("kd") && _onGains)
-        _onGains((float)doc["kp"], (float)doc["ki"], (float)doc["kd"]);
+    if (doc.containsKey("rollKp") && doc.containsKey("rollKi") &&
+        doc.containsKey("rollKd") && _onRollGains)
+        _onRollGains((float)doc["rollKp"], (float)doc["rollKi"], (float)doc["rollKd"]);
+
+    if (doc.containsKey("driveKp") && doc.containsKey("driveKi") &&
+        doc.containsKey("driveKd") && _onDriveGains)
+        _onDriveGains((float)doc["driveKp"], (float)doc["driveKi"], (float)doc["driveKd"]);
 
     if (doc.containsKey("driveSpeed") && _onDriveSpeed)
         _onDriveSpeed((float)doc["driveSpeed"]);
