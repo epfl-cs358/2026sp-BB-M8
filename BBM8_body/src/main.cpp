@@ -11,14 +11,14 @@ constexpr int DIR_PIN  = 26; // GPIO pin connected to A4988 DIR
 constexpr uint32_t LOOP_MS = 20; // 50 Hz control loop
 
 // ---- Roll PID gains (!!! TO TUNE !!!) ---- 
-constexpr float KP_ROLL = 1.0f;
-constexpr float KI_ROLL = 0.0f;
-constexpr float KD_ROLL = 0.05f;
+constexpr float KP_ROLL = 0.9f;
+constexpr float KI_ROLL = 0.05f;
+constexpr float KD_ROLL = 0.1f;
 
 // ---- Drive PID gains (!!! TO TUNE !!!) ---- 
 constexpr float KP_DRIVE = 1.0f;
 constexpr float KI_DRIVE = 0.0f;
-constexpr float KD_DRIVE = 0.05f;
+constexpr float KD_DRIVE = 0.0f;
 
 // Max stepper speed in steps/second
 // max robot speed = MAX_STEPPER_SPEED * 0.35m * PI / (200 (steps/rev) * 10 (gear ratio))
