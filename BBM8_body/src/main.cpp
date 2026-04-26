@@ -8,7 +8,8 @@
 constexpr int SERVO_PIN = 18; // GPIO pin connected to servo signal wire
 constexpr int STEP_PIN = 25; // GPIO pin connected to A4988 STEP
 constexpr int DIR_PIN  = 26; // GPIO pin connected to A4988 DIR
-constexpr uint32_t LOOP_MS = 20; // 50 Hz control loop
+constexpr uint32_t CONTROL_LOOP_MS = 20; // 50 Hz control loop
+constexpr uint32_t TELEMETRY_INTERVAL_MS = 100; // 10 Hz telemetry rate
 
 // ---- Roll PID gains (!!! TO TUNE !!!) ---- 
 constexpr float KP_ROLL = 0.9f;
@@ -42,6 +43,7 @@ DriveController driveCtrl(KP_DRIVE, KI_DRIVE, KD_DRIVE, MAX_STEPPER_SPEED, STEP_
 Telemetry      telemetry(WIFI_SSID, WIFI_PASS);
 
 uint32_t lastTime = 0;
+uint32_t lastTelemetryTime = 0;
 
 void setup() {
     Serial.begin(115200);
@@ -74,6 +76,7 @@ void setup() {
     telemetry.begin();
 
     lastTime = millis();
+    lastTelemetryTime = millis();
 }
 
 void loop() {
@@ -83,7 +86,8 @@ void loop() {
     uint32_t now     = millis();
     uint32_t elapsed = now - lastTime;
 
-    if (elapsed >= LOOP_MS && !STOP) {
+    // Control loop 
+    if (elapsed >= CONTROL_LOOP_MS && !STOP) {
         float dt = elapsed / 1000.0f;
         lastTime = now;
 
@@ -93,6 +97,16 @@ void loop() {
         // Control
         rollCtrl.update(state.getRoll(), dt);
         driveCtrl.update(state.getPitch(), dt);
+
+    } else if (STOP) {
+        Serial.println("---- STOPPED ----");
+        lastTime = now;
+    }
+
+    uint32_t elapsedTelemetry = now - lastTelemetryTime;
+    // Telemetry loop
+    if (elapsedTelemetry >= TELEMETRY_INTERVAL_MS) {
+        lastTelemetryTime = now;
 
         // Telemetry over WebSocket
         telemetry.sendTelemetry(
@@ -113,8 +127,5 @@ void loop() {
         //               rollCtrl.pid().getLastError(),
         //               rollCtrl.pid().getIntegral(),
         //               rollCtrl.pid().getLastDerivative());
-    } else {
-        Serial.println("---- STOPPED ----");
-        lastTime = now;
     }
 }
