@@ -42,7 +42,7 @@ RollController rollCtrl(KP_ROLL, KI_ROLL, KD_ROLL, SERVO_PIN);
 DriveController driveCtrl(KP_DRIVE, KI_DRIVE, KD_DRIVE, MAX_STEPPER_SPEED, STEP_PIN, DIR_PIN);
 Telemetry      telemetry(WIFI_SSID, WIFI_PASS);
 
-uint32_t lastTime = 0;
+uint32_t lastControlTime = 0;
 uint32_t lastTelemetryTime = 0;
 
 void setup() {
@@ -75,7 +75,7 @@ void setup() {
     // Start the WiFi only after registering the callbacks
     telemetry.begin();
 
-    lastTime = millis();
+    lastControlTime = millis();
     lastTelemetryTime = millis();
 }
 
@@ -84,12 +84,12 @@ void loop() {
     telemetry.update();
 
     uint32_t now     = millis();
-    uint32_t elapsed = now - lastTime;
 
+    uint32_t elapsedControl = now - lastControlTime;
     // Control loop 
-    if (elapsed >= CONTROL_LOOP_MS && !STOP) {
-        float dt = elapsed / 1000.0f;
-        lastTime = now;
+    if (elapsedControl >= CONTROL_LOOP_MS && !STOP) {
+        float dt = elapsedControl / 1000.0f;
+        lastControlTime = now;
 
         // Estimate state
         state.update(dt);
@@ -100,7 +100,7 @@ void loop() {
 
     } else if (STOP) {
         Serial.println("---- STOPPED ----");
-        lastTime = now;
+        lastControlTime = now;
     }
 
     uint32_t elapsedTelemetry = now - lastTelemetryTime;
