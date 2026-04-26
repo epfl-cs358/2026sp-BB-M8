@@ -58,6 +58,9 @@ public:
     void onDriveSpeedChanged(void (*callback)(float mPerSec)) {
         _onDriveSpeed = callback;
     }
+    void onStopChanged(void (*callback)(bool stop)) {
+        _onStop = callback;
+    }
 
     bool isConnected() const { return _clientCount > 0; }
 
@@ -71,6 +74,7 @@ private:
     void (*_onTarget)(float targetDeg)             = nullptr;
     void (*_onGains)(float kp, float ki, float kd) = nullptr;
     void (*_onDriveSpeed)(float mPerSec)           = nullptr;
+    void (*_onStop)(bool stop)                     = nullptr;
 
     void handleMessage(uint8_t* payload, size_t length);
     void webSocketEvent(uint8_t num, WStype_t type,

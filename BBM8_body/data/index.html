@@ -314,6 +314,18 @@
   .btn:active { opacity: 0.7; }
   .btn-warn { border-color: var(--warn); color: var(--warn); }
   .btn-warn:hover { background: var(--warn); color: var(--bg); }
+  .btn-stop {
+    border-color: var(--err); color: var(--err);
+    font-size: 0.9rem; padding: 10px;
+    box-shadow: 0 0 8px rgba(204,0,51,0.3);
+  }
+  .btn-stop:hover { background: var(--err); color: var(--bg); box-shadow: 0 0 14px rgba(204,0,51,0.6); }
+  .btn-resume {
+    border-color: var(--ok); color: var(--ok);
+    font-size: 0.9rem; padding: 10px;
+    box-shadow: 0 0 8px rgba(26,138,46,0.3);
+  }
+  .btn-resume:hover { background: var(--ok); color: var(--bg); box-shadow: 0 0 14px rgba(26,138,46,0.6); }
 
   .flash { animation: flashAnim 0.4s ease; }
   @keyframes flashAnim {
@@ -465,6 +477,11 @@
 
     <!-- Controls -->
     <div class="controls-panel">
+
+      <div class="control-block">
+        <div class="control-title">Safety</div>
+        <button id="btn-stop" class="btn btn-stop" onclick="toggleStop()">STOP</button>
+      </div>
 
       <div class="control-block">
         <div class="control-title">Target Roll</div>
@@ -638,9 +655,26 @@
   }
 
   // ── Commands ──
+  let stopped = false;
+
   function send(obj) {
     if (!ws || ws.readyState !== WebSocket.OPEN) { log('NOT CONNECTED'); return; }
     ws.send(JSON.stringify(obj));
+  }
+
+  function toggleStop() {
+    stopped = !stopped;
+    send({ stop: stopped });
+    const btn = document.getElementById('btn-stop');
+    if (stopped) {
+      btn.textContent = 'RESUME';
+      btn.className = 'btn btn-resume';
+      log('STOP SENT — robot halted');
+    } else {
+      btn.textContent = 'STOP';
+      btn.className = 'btn btn-stop';
+      log('RESUME SENT — robot running');
+    }
   }
 
   function sendTarget() {

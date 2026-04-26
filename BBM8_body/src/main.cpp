@@ -32,6 +32,9 @@ constexpr float ALPHA = 0.98f;
 constexpr char WIFI_SSID[] = "BBM8-body";
 constexpr char WIFI_PASS[] = "starwars";
 
+// ---- Safety ----
+bool STOP = false; // Set to true to stop the robot
+
 // ---- Module instances ----
 StateEstimator state(ALPHA);
 RollController rollCtrl(KP_ROLL, KI_ROLL, KD_ROLL, SERVO_PIN);
@@ -64,6 +67,9 @@ void setup() {
     telemetry.onDriveSpeedChanged([](float mPerSec) {
         driveCtrl.setTargetSpeed(mPerSec);
     });
+    telemetry.onStopChanged([](bool stop) {
+        STOP = stop;
+    });
     // Start the WiFi only after registering the callbacks
     telemetry.begin();
 
@@ -77,7 +83,7 @@ void loop() {
     uint32_t now     = millis();
     uint32_t elapsed = now - lastTime;
 
-    if (elapsed >= LOOP_MS) {
+    if (elapsed >= LOOP_MS && !STOP) {
         float dt = elapsed / 1000.0f;
         lastTime = now;
 
@@ -107,5 +113,8 @@ void loop() {
         //               rollCtrl.pid().getLastError(),
         //               rollCtrl.pid().getIntegral(),
         //               rollCtrl.pid().getLastDerivative());
+    } else {
+        Serial.println("---- STOPPED ----");
+        lastTime = now;
     }
 }
