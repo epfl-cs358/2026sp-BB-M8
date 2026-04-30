@@ -1,24 +1,44 @@
 #include "DriveController.hpp"
 
 DriveController::DriveController(float maxSpeed, int stepPin, int dirPin)
-    : _stepper(AccelStepper::DRIVER, stepPin, dirPin),
-      _maxSpeed(maxSpeed),
-      _targetMPerSec(0.0f)
+    : _engine(), _stepper(nullptr),
+      _stepPin(stepPin), _dirPin(dirPin),
+      _maxSpeed(maxSpeed), _targetMPerSec(0.0f)
 {}
 
 void DriveController::begin() {
-    _stepper.setMaxSpeed(_maxSpeed);
-    _stepper.setSpeed(0.0f);
+    _engine.init();
+    _stepper = _engine.stepperConnectToPin(_stepPin);
+    if (_stepper == nullptr) {
+        Serial.println("[ERROR] DriveController: stepperConnectToPin failed");
+        return;
+    }
+    _stepper->setDirectionPin(_dirPin);
+    _stepper->setAcceleration(3000);
+    _stepper->setSpeedInHz(0); // Intialized with zero speed
 }
 
 void DriveController::update(float pitchDeg) {
-    float targetStepsPerSec = mPerSecToSteps(_targetMPerSec);
-    float limited = applyPitchLimiter(targetStepsPerSec, pitchDeg);
-    _stepper.setSpeed(limited);
-}
+    if (_stepper == nullptr) return;
 
-void DriveController::tick() {
-    _stepper.runSpeed();
+    float targetStepsPerSec = mPerSecToSteps(_targetMPerSec);
+    // Apply pitch limiter
+    float limited = applyPitchLimiter(targetStepsPerSec, pitchDeg);
+    // Constrain to max speed
+    if (limited >  _maxSpeed) limited =  _maxSpeed;
+    if (limited < -_maxSpeed) limited = -_maxSpeed;
+
+    if (limited == 0.0f) {
+        _stepper->stopMove();
+        return;
+    }
+
+    uint32_t absHz = static_cast<uint32_t>(fabsf(limited));
+    _stepper->setSpeedInHz(absHz);
+    if (limited > 0.0f)
+        _stepper->runForward();
+    else
+        _stepper->runBackward();
 }
 
 float DriveController::stepsPerM() const {

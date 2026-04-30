@@ -1,12 +1,12 @@
 #pragma once
 #include <Arduino.h>
-#include <AccelStepper.h>
+#include <FastAccelStepper.h>
 
 /**
  * DriveController.hpp
  *
  * Controls forward/backward motion of the sphere using a NEMA 17
- * driven by an A4988 via AccelStepper.
+ * driven by an A4988 via FastAccelStepper (interrupt-driven).
  *
  * Target speed (m/s) is converted directly to steps/s.
  * Pitch is used as a safety limiter to prevent the body from rotating around the main axis.
@@ -41,13 +41,16 @@ public:
      * @param pitchDeg  Current pitch from StateEstimator (degrees)
      */
     void update(float pitchDeg);
-    void tick();
 
     void setTargetSpeed(float mPerSec) { _targetMPerSec = mPerSec; }
     float getTargetSpeed() const { return _targetMPerSec; }
+    void forceStop() { if (_stepper) _stepper->forceStop(); }
 
 private:
-    AccelStepper _stepper;
+    FastAccelStepperEngine _engine;
+    FastAccelStepper*      _stepper;
+    int   _stepPin;
+    int   _dirPin;
     float _maxSpeed;
     float _targetMPerSec;
 

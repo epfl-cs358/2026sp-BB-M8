@@ -77,9 +77,6 @@ void loop() {
     // Handle incoming WebSocket messages
     telemetry.update();
 
-    // Step the motor on every loop iteration for smooth motion
-    driveCtrl.tick();
-
     uint32_t now     = millis();
 
     uint32_t elapsedControl = now - lastControlTime;
@@ -96,6 +93,7 @@ void loop() {
         driveCtrl.update(state.getPitch());
 
     } else if (STOP) {
+        driveCtrl.forceStop();
         Serial.println("---- STOPPED ----");
         lastControlTime = now;
     }
