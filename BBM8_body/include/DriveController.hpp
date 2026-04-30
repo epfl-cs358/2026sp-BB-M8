@@ -25,7 +25,7 @@ public:
     static constexpr float SPHERE_DIAMETER_M = 0.35f;
 
     // Pitch safety limit (degrees). If |pitch| exceeds this, speed command is zeroed
-    static constexpr float MAX_PITCH_DEG = 15.0f;
+    static constexpr float MAX_PITCH_DEG = 45.0f;
 
     /**
      * @param maxSpeed  Maximum stepper speed in steps/second

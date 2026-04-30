@@ -43,9 +43,8 @@ uint32_t lastTelemetryTime = 0;
 void setup() {
     Serial.begin(115200);
 
-    if (!state.begin()) {
+    while (!state.begin()){
         Serial.println("[ERROR] MPU-9250 not found. Check wiring.");
-        while (true) delay(1000);  // Halt
     }
     Serial.println("[OK] MPU-9250 initialised.");
 
@@ -105,7 +104,7 @@ void loop() {
     // Telemetry loop
     if (elapsedTelemetry >= TELEMETRY_INTERVAL_MS) {
         lastTelemetryTime = now;
-
+        Serial.println("---- sending telemetry ----");
         // Telemetry over WebSocket
         telemetry.sendTelemetry(
             state.getRoll(),
