@@ -35,10 +35,10 @@ void Telemetry::update() {
 void Telemetry::sendTelemetry(
         float roll,       float pitch,
         float rollTarget, float rollOutput, float rollErr, float rollIntegral, float rollDerivative,
-        float driveSpeed, float driveOutput, float driveErr, float driveIntegral, float driveDerivative) {
+        float driveSpeed) {
     if (_clientCount == 0) return;
 
-    StaticJsonDocument<384> doc;
+    StaticJsonDocument<256> doc;
 
     JsonObject state = doc.createNestedObject("state");
     state["roll"]  = serialized(String(roll,  2));
@@ -52,13 +52,9 @@ void Telemetry::sendTelemetry(
     pid["der"]    = serialized(String(rollDerivative,2));
 
     JsonObject drive = doc.createNestedObject("drive");
-    drive["speed"]  = serialized(String(driveSpeed,   2));
-    drive["output"] = serialized(String(driveOutput,  2));
-    drive["err"]    = serialized(String(driveErr,     2));
-    drive["int"]    = serialized(String(driveIntegral,2));
-    drive["der"]    = serialized(String(driveDerivative,2));
+    drive["speed"] = serialized(String(driveSpeed, 2));
 
-    char buffer[384];
+    char buffer[256];
     serializeJson(doc, buffer);
     _ws.broadcastTXT(buffer);
 }
@@ -73,10 +69,6 @@ void Telemetry::handleMessage(uint8_t* payload, size_t length) {
     if (doc.containsKey("rollKp") && doc.containsKey("rollKi") &&
         doc.containsKey("rollKd") && _onRollGains)
         _onRollGains((float)doc["rollKp"], (float)doc["rollKi"], (float)doc["rollKd"]);
-
-    if (doc.containsKey("driveKp") && doc.containsKey("driveKi") &&
-        doc.containsKey("driveKd") && _onDriveGains)
-        _onDriveGains((float)doc["driveKp"], (float)doc["driveKi"], (float)doc["driveKd"]);
 
     if (doc.containsKey("driveSpeed") && _onDriveSpeed)
         _onDriveSpeed((float)doc["driveSpeed"]);

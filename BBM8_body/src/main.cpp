@@ -16,14 +16,9 @@ constexpr float KP_ROLL = 0.9f;
 constexpr float KI_ROLL = 0.05f;
 constexpr float KD_ROLL = 0.1f;
 
-// ---- Drive PID gains (!!! TO TUNE !!!) ---- 
-constexpr float KP_DRIVE = 1.0f;
-constexpr float KI_DRIVE = 0.0f;
-constexpr float KD_DRIVE = 0.0f;
-
 // Max stepper speed in steps/second
 // max robot speed = MAX_STEPPER_SPEED * 0.35m * PI / (200 (steps/rev) * 10 (gear ratio))
-constexpr float MAX_STEPPER_SPEED = 400.0f;
+constexpr float MAX_STEPPER_SPEED = 2000.0f;
 
 // ---- Complementary filter coefficient (!!! TO TUNE !!!) ----
 // 0.98 = trust gyro 98% short-term, correct with accel 2% long-term
@@ -39,7 +34,7 @@ bool STOP = false; // Set to true to stop the robot
 // ---- Module instances ----
 StateEstimator state(ALPHA);
 RollController rollCtrl(KP_ROLL, KI_ROLL, KD_ROLL, SERVO_PIN);
-DriveController driveCtrl(KP_DRIVE, KI_DRIVE, KD_DRIVE, MAX_STEPPER_SPEED, STEP_PIN, DIR_PIN);
+DriveController driveCtrl(MAX_STEPPER_SPEED, STEP_PIN, DIR_PIN);
 Telemetry      telemetry(WIFI_SSID, WIFI_PASS);
 
 uint32_t lastControlTime = 0;
@@ -66,9 +61,6 @@ void setup() {
     telemetry.onRollGainsChanged([](float kp, float ki, float kd) {
         rollCtrl.pid().setGains(kp, ki, kd);
     });
-    telemetry.onDriveGainsChanged([](float kp, float ki, float kd) {
-        driveCtrl.pid().setGains(kp, ki, kd);
-    });
     telemetry.onDriveSpeedChanged([](float mPerSec) {
         driveCtrl.setTargetSpeed(mPerSec);
     });
@@ -86,6 +78,9 @@ void loop() {
     // Handle incoming WebSocket messages
     telemetry.update();
 
+    // Step the motor on every loop iteration for smooth motion
+    driveCtrl.tick();
+
     uint32_t now     = millis();
 
     uint32_t elapsedControl = now - lastControlTime;
@@ -99,7 +94,7 @@ void loop() {
 
         // Control
         rollCtrl.update(state.getRoll(), dt);
-        driveCtrl.update(state.getPitch(), dt);
+        driveCtrl.update(state.getPitch());
 
     } else if (STOP) {
         Serial.println("---- STOPPED ----");
@@ -113,21 +108,14 @@ void loop() {
 
         // Telemetry over WebSocket
         telemetry.sendTelemetry(
-            // State Estimator
             state.getRoll(),
             state.getPitch(),
-            // Roll PID
             rollCtrl.getTarget(),
             rollCtrl.pid().getLastOutput(),
             rollCtrl.pid().getLastError(),
             rollCtrl.pid().getIntegral(),
             rollCtrl.pid().getLastDerivative(),
-            // Drive PID
-            driveCtrl.getCurrentSpeed(),
-            driveCtrl.getLastOutput(),
-            driveCtrl.pid().getLastError(),
-            driveCtrl.pid().getIntegral(),
-            driveCtrl.pid().getLastDerivative()
+            driveCtrl.getTargetSpeed()
         );
 
         // Serial print for debugging
