@@ -14,7 +14,7 @@ void DriveController::begin() {
         return;
     }
     _stepper->setDirectionPin(_dirPin);
-    _stepper->setAcceleration(3000);
+    _stepper->setAcceleration(1000);
     _stepper->setSpeedInHz(0); // Intialized with zero speed
 }
 
