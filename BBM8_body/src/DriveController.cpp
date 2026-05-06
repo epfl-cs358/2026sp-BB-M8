@@ -14,7 +14,7 @@ void DriveController::begin() {
         return;
     }
     _stepper->setDirectionPin(_dirPin);
-    _stepper->setAcceleration(1000);
+    _stepper->setAcceleration(2000);
     _stepper->setSpeedInHz(0); // Intialized with zero speed
 }
 
@@ -28,17 +28,20 @@ void DriveController::update(float pitchDeg) {
     if (limited >  _maxSpeed) limited =  _maxSpeed;
     if (limited < -_maxSpeed) limited = -_maxSpeed;
 
-    if (limited == 0.0f) {
+    if (fabs(limited) <= 20.0f) {
         _stepper->stopMove();
         return;
     }
 
     uint32_t absHz = static_cast<uint32_t>(fabsf(limited));
-    _stepper->setSpeedInHz(absHz);
-    if (limited > 0.0f)
-        _stepper->runForward();
-    else
-        _stepper->runBackward();
+    uint32_t currHz = _stepper->getSpeedInMilliHz() / 1000;
+    if (fabs(absHz - currHz) > 20){
+        _stepper->setSpeedInHz(absHz);
+        if (limited > 0.0f)
+            _stepper->runForward();
+        else
+            _stepper->runBackward();
+    }
 }
 
 float DriveController::stepsPerM() const {

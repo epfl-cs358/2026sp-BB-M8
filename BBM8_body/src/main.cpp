@@ -18,7 +18,7 @@ constexpr float KD_ROLL = 0.1f;
 
 // Max stepper speed in steps/second
 // max robot speed = MAX_STEPPER_SPEED * 0.35m * PI / (200 (steps/rev) * 10 (gear ratio))
-constexpr float MAX_STEPPER_SPEED = 2000.0f;
+constexpr float MAX_STEPPER_SPEED = 1300.0f;
 
 // ---- Complementary filter coefficient (!!! TO TUNE !!!) ----
 // 0.98 = trust gyro 98% short-term, correct with accel 2% long-term
