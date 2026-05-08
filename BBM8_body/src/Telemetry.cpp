@@ -2,101 +2,78 @@
 
 Telemetry* Telemetry::_instance = nullptr;
 
-Telemetry::Telemetry(const char* ssid, const char* password, uint16_t wsPort)
-    : _ssid(ssid), _password(password),
-      _ws(wsPort), _http(80), _clientCount(0)
-{}
-
 void Telemetry::begin() {
     _instance = this;
 
-    // Start WiFi Access Point
-    WiFi.softAP(_ssid, _password);
+    WiFi.mode(WIFI_STA);
 
-    // Mount SPIFFS filesystem (where index.html lives)
-    if (!SPIFFS.begin(true)) {
-        Serial.println("[Telemetry] SPIFFS mount failed.");
+    if (esp_now_init() != ESP_OK) {
+        Serial.println("[Telemetry] esp_now_init failed.");
         return;
     }
 
-    // Serve dashboard from SPIFFS
-    _http.serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
-    _http.begin();
+    esp_now_register_recv_cb(onRecv);
 
-    // Start WebSocket server
-    _ws.begin();
-    _ws.onEvent(staticWsEvent);
+    esp_now_peer_info_t peer{};
+    memcpy(peer.peer_addr, HEAD_MAC, 6);
+    peer.channel = ESPNOW_CHANNEL;
+    peer.encrypt = false;
+    if (esp_now_add_peer(&peer) != ESP_OK) {
+        Serial.println("[Telemetry] Failed to add head peer.");
+        return;
+    }
+
+    _peerRegistered = true;
+    Serial.printf("[Telemetry] ESP-NOW ready. Body MAC: %s\n", WiFi.macAddress().c_str());
 }
 
 void Telemetry::update() {
-    _ws.loop();
+    // ESP-NOW recv fires in the WiFi FreeRTOS task; callbacks are invoked there directly.
+    // The controller setters (setTarget, setGains, etc.) are single float/bool writes —
+    // atomic on Xtensa — so no additional synchronisation is needed here.
 }
 
 void Telemetry::sendTelemetry(
         float roll,       float pitch,
         float rollTarget, float rollOutput, float rollErr, float rollIntegral, float rollDerivative,
         float driveSpeed) {
-    if (_clientCount == 0) return;
+    if (!_peerRegistered) return;
 
-    StaticJsonDocument<256> doc;
+    TelemetryPacket pkt{};
+    pkt.roll            = roll;
+    pkt.pitch           = pitch;
+    pkt.rollTarget      = rollTarget;
+    pkt.rollOutput      = rollOutput;
+    pkt.rollErr         = rollErr;
+    pkt.rollIntegral    = rollIntegral;
+    pkt.rollDerivative  = rollDerivative;
+    pkt.driveSpeed      = driveSpeed;
 
-    JsonObject state = doc.createNestedObject("state");
-    state["roll"]  = serialized(String(roll,  2));
-    state["pitch"] = serialized(String(pitch, 2));
-
-    JsonObject pid = doc.createNestedObject("pid");
-    pid["target"] = serialized(String(rollTarget,    2));
-    pid["output"] = serialized(String(rollOutput,    2));
-    pid["err"]    = serialized(String(rollErr,       2));
-    pid["int"]    = serialized(String(rollIntegral,  2));
-    pid["der"]    = serialized(String(rollDerivative,2));
-
-    JsonObject drive = doc.createNestedObject("drive");
-    drive["speed"] = serialized(String(driveSpeed, 2));
-
-    char buffer[256];
-    serializeJson(doc, buffer);
-    _ws.broadcastTXT(buffer);
+    esp_now_send(HEAD_MAC, reinterpret_cast<const uint8_t*>(&pkt), sizeof(pkt));
 }
 
-void Telemetry::handleMessage(uint8_t* payload, size_t length) {
-    StaticJsonDocument<192> doc;
-    if (deserializeJson(doc, payload, length)) return;
-
-    if (doc.containsKey("target") && _onTarget)
-        _onTarget((float)doc["target"]);
-
-    if (doc.containsKey("rollKp") && doc.containsKey("rollKi") &&
-        doc.containsKey("rollKd") && _onRollGains)
-        _onRollGains((float)doc["rollKp"], (float)doc["rollKi"], (float)doc["rollKd"]);
-
-    if (doc.containsKey("driveSpeed") && _onDriveSpeed)
-        _onDriveSpeed((float)doc["driveSpeed"]);
-
-    if (doc.containsKey("stop") && _onStop)
-        _onStop((bool)doc["stop"]);
-}
-
-void Telemetry::webSocketEvent(uint8_t num, WStype_t type,
-                                uint8_t* payload, size_t length) {
-    switch (type) {
-        case WStype_CONNECTED:
-            _clientCount++;
-            Serial.printf("[WS] Client #%d connected\n", num);
+void Telemetry::dispatchCommand(const CommandPacket& pkt) {
+    switch (pkt.cmdType) {
+        case CMD_TARGET:
+            if (_onTarget) _onTarget(pkt.target);
             break;
-        case WStype_DISCONNECTED:
-            if (_clientCount > 0) _clientCount--;
+        case CMD_ROLL_GAINS:
+            if (_onRollGains) _onRollGains(pkt.rollKp, pkt.rollKi, pkt.rollKd);
             break;
-        case WStype_TEXT:
-            handleMessage(payload, length);
+        case CMD_DRIVE_SPEED:
+            if (_onDriveSpeed) _onDriveSpeed(pkt.driveSpeed);
+            break;
+        case CMD_STOP:
+            if (_onStop) _onStop(pkt.stop != 0);
             break;
         default:
             break;
     }
 }
 
-void Telemetry::staticWsEvent(uint8_t num, WStype_t type,
-                               uint8_t* payload, size_t length) {
-    if (_instance)
-        _instance->webSocketEvent(num, type, payload, length);
+void Telemetry::onRecv(const uint8_t* /*mac*/, const uint8_t* data, int len) {
+    if (!_instance || len < static_cast<int>(sizeof(CommandPacket))) return;
+    const auto* pkt = reinterpret_cast<const CommandPacket*>(data);
+    if (pkt->type != PacketType::COMMAND) return;
+    _instance->dispatchCommand(*pkt);
 }

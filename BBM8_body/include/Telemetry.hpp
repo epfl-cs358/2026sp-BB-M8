@@ -1,82 +1,49 @@
 #pragma once
 #include <Arduino.h>
 #include <WiFi.h>
-#include <SPIFFS.h>
-#include <WebSocketsServer.h>
-#include <ESPAsyncWebServer.h>
-#include <ArduinoJson.h>
+#include <esp_now.h>
+#include "EspNowPackets.hpp"
+#include "EspNowConfig.hpp"
 
 /**
- * Telemetry.h
+ * Telemetry (body side)
  *
- * Manages a WiFi Access Point, an HTTP server (serves the dashboard
- * from SPIFFS), and a WebSocket server (bidirectional data exchange).
+ * Sends TelemetryPackets to the head ESP32-CAM via ESP-NOW at 10 Hz.
+ * Receives CommandPackets from the head and dispatches them via callbacks.
  *
- * The dashboard HTML lives in data/index.html — upload it separately
- * via PlatformIO: Tasks > Upload Filesystem Image (or pio run -t uploadfs)
+ * WiFi is set to STA mode (no AP, no association) — the head owns the AP.
+ * ESP-NOW and the head AP must be on the same channel (ESPNOW_CHANNEL).
  *
- * Connect to hotspot, open http://192.168.4.1 in a browser.
- * WebSocket runs on ws://192.168.4.1:81
- *
- * Messages ESP32 -> browser (JSON):
- *   {"roll":1.2,"pitch":0.3,"err":0.5,"int":0.0,"der":0.1}
- *
- * Messages browser -> ESP32 (JSON):
- *   {"target":10.0}
- *   {"kp":1.5,"ki":0.0,"kd":0.05}
  */
 class Telemetry {
 public:
-    Telemetry(const char* ssid, const char* password, uint16_t wsPort = 81);
+    Telemetry() = default;
 
-    /**
-     * Call once in setup().
-     * Mounts SPIFFS, starts the HTTP server and WebSocket server.
-     */
     void begin();
-
-    /**
-     * Call every loop iteration — processes incoming WebSocket messages.
-     */
-    void update();
+    void update();  // no-op — ESP-NOW recv fires in a FreeRTOS callback
 
     void sendTelemetry(
         float roll,       float pitch,
         float rollTarget, float rollOutput, float rollErr, float rollIntegral, float rollDerivative,
         float driveSpeed);
 
-    void onTargetChanged(void (*callback)(float targetDeg)) {
-        _onTarget = callback;
-    }
-    void onRollGainsChanged(void (*callback)(float kp, float ki, float kd)) {
-        _onRollGains = callback;
-    }
-    void onDriveSpeedChanged(void (*callback)(float mPerSec)) {
-        _onDriveSpeed = callback;
-    }
-    void onStopChanged(void (*callback)(bool stop)) {
-        _onStop = callback;
-    }
+    void onTargetChanged(void (*cb)(float targetDeg))               { _onTarget     = cb; }
+    void onRollGainsChanged(void (*cb)(float kp, float ki, float kd)) { _onRollGains = cb; }
+    void onDriveSpeedChanged(void (*cb)(float mPerSec))             { _onDriveSpeed  = cb; }
+    void onStopChanged(void (*cb)(bool stop))                       { _onStop        = cb; }
 
-    bool isConnected() const { return _clientCount > 0; }
+    bool isConnected() const { return _peerRegistered; }
 
 private:
-    const char*      _ssid;
-    const char*      _password;
-    WebSocketsServer _ws;
-    AsyncWebServer   _http;
-    uint8_t          _clientCount;
+    bool _peerRegistered = false;
 
-    void (*_onTarget)(float targetDeg)             = nullptr;
-    void (*_onRollGains)(float kp, float ki, float kd) = nullptr;
-    void (*_onDriveSpeed)(float mPerSec)            = nullptr;
-    void (*_onStop)(bool stop)                     = nullptr;
+    void (*_onTarget)(float)                    = nullptr;
+    void (*_onRollGains)(float, float, float)   = nullptr;
+    void (*_onDriveSpeed)(float)                = nullptr;
+    void (*_onStop)(bool)                       = nullptr;
 
-    void handleMessage(uint8_t* payload, size_t length);
-    void webSocketEvent(uint8_t num, WStype_t type,
-                        uint8_t* payload, size_t length);
+    void dispatchCommand(const CommandPacket& pkt);
 
     static Telemetry* _instance;
-    static void staticWsEvent(uint8_t num, WStype_t type,
-                              uint8_t* payload, size_t length);
+    static void onRecv(const uint8_t* mac, const uint8_t* data, int len);
 };

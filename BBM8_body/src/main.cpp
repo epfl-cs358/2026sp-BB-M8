@@ -24,10 +24,6 @@ constexpr float MAX_STEPPER_SPEED = 1300.0f;
 // 0.98 = trust gyro 98% short-term, correct with accel 2% long-term
 constexpr float ALPHA = 0.98f;
 
-// ---- WiFi hotspot credentials ----
-constexpr char WIFI_SSID[] = "BBM8-body";
-constexpr char WIFI_PASS[] = "starwars";
-
 // ---- Safety ----
 bool STOP = false; // Set to true to stop the robot
 
@@ -35,7 +31,7 @@ bool STOP = false; // Set to true to stop the robot
 StateEstimator state(ALPHA);
 RollController rollCtrl(KP_ROLL, KI_ROLL, KD_ROLL, SERVO_PIN);
 DriveController driveCtrl(MAX_STEPPER_SPEED, STEP_PIN, DIR_PIN);
-Telemetry      telemetry(WIFI_SSID, WIFI_PASS);
+Telemetry      telemetry;
 
 uint32_t lastControlTime = 0;
 uint32_t lastTelemetryTime = 0;
