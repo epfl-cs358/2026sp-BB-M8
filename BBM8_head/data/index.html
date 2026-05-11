@@ -582,6 +582,18 @@
         <button class="btn" onclick="sendRollGains()">APPLY ROLL GAINS</button>
       </div>
 
+      <div class="control-block">
+        <div class="control-title">Head Rotation</div>
+        <div class="input-row">
+          <label>steps</label>
+          <input type="number" id="inp-head-steps" value="512" step="64">
+        </div>
+        <div style="display:flex; gap:6px;">
+          <button class="btn btn-warn" style="flex:1" onclick="sendHeadStep(-1)">&#9664; CCW</button>
+          <button class="btn btn-warn" style="flex:1" onclick="sendHeadStep(1)">CW &#9654;</button>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -773,6 +785,12 @@
     send({ rollKp: kp, rollKi: ki, rollKd: kd });
     log('ROLL GAINS → Kp:' + kp + ' Ki:' + ki + ' Kd:' + kd);
     flash('inp-kp'); flash('inp-ki'); flash('inp-kd');
+  }
+
+  function sendHeadStep(dir) {
+    const steps = parseInt(document.getElementById('inp-head-steps').value) * dir;
+    send({ headStep: steps });
+    log('HEAD → ' + (dir > 0 ? 'CW' : 'CCW') + ' ' + Math.abs(steps) + ' steps');
   }
 
   function flash(id) {
