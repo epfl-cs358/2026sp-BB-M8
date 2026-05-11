@@ -4,6 +4,7 @@
 #include "Telemetry.hpp"
 #include "EspNowPackets.hpp"
 #include "EspNowConfig.hpp"
+#include "Camera.hpp"
 
 Telemetry telemetry;
 
@@ -53,6 +54,9 @@ void setup() {
 
     // begin() starts softAP on ESPNOW_CHANNEL, then esp_now_init, then HTTP + WebSocket.
     telemetry.begin();
+
+    if (camera_init())
+        camera_stream_begin();
 
     // Register body as ESP-NOW peer (for outgoing CommandPackets).
     esp_now_peer_info_t peer{};
