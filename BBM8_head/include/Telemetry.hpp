@@ -33,6 +33,8 @@ public:
     // Called by main.cpp ESP-NOW recv handler with a packet from the body.
     void forwardTelemetry(const TelemetryPacket& pkt);
 
+    void onHeadStepChanged(void (*cb)(int steps)) { _onHeadStep = cb; }
+
     void onTargetChanged(void (*cb)(float targetDeg))                   { _onTarget    = cb; }
     void onRollGainsChanged(void (*cb)(float kp, float ki, float kd))   { _onRollGains = cb; }
     void onDriveSpeedChanged(void (*cb)(float mPerSec))                 { _onDriveSpeed= cb; }
@@ -44,6 +46,8 @@ private:
     WebSocketsServer _ws;
     AsyncWebServer   _http;
     uint8_t          _clientCount = 0;
+
+    void (*_onHeadStep)(int) = nullptr;
 
     void (*_onTarget)(float)                    = nullptr;
     void (*_onRollGains)(float, float, float)   = nullptr;
