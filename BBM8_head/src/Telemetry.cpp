@@ -1,4 +1,5 @@
 #include "Telemetry.hpp"
+#include "Camera.hpp"
 
 Telemetry* Telemetry::_instance = nullptr;
 
@@ -26,6 +27,7 @@ void Telemetry::begin() {
     }
 
     _http.serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
+    camera_register_photo_handler(_http);
     _http.begin();
 
     _ws.begin();

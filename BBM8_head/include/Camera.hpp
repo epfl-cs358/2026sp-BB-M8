@@ -1,4 +1,7 @@
 #pragma once
 
-bool camera_init();       // init OV2640; returns false on failure
-void camera_stream_begin(); // start MJPEG HTTP server on port 82
+class AsyncWebServer;  // forward declaration — avoids pulling ESPAsyncWebServer into Camera.cpp
+
+bool camera_init();
+void camera_stream_begin();
+void camera_register_photo_handler(AsyncWebServer& server);

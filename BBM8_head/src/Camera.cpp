@@ -123,3 +123,4 @@ bool camera_init() {
 void camera_stream_begin() {
     xTaskCreate(stream_task, "cam_stream", 4096, nullptr, 5, nullptr);
 }
+
