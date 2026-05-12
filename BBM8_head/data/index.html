@@ -3,752 +3,383 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BB-M8 CONTROL</title>
+<title>BB-M8</title>
 <style>
-  
-
-  :root {
-    /* Light theme */
-    --bg:      #f0f2f5;
-    --panel:   #ffffff;
-    --border:  #d0d5e0;
-    --accent:  #0070cc;
-    --warn:    #d94f00;
-    --ok:      #1a8a2e;
-    --text:    #1a202c;
-    --dim:     #6b7a99;
-    /* State estimator colors */
-    --roll:    #0070cc;
-    --pitch:   #d94f00;
-    /* PID colors */
-    --output:  #b07d00;
-    --err:     #cc0033;
-    --der:     #6b3fbf;
-    --int:     #1a8a2e;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: #f7f9fc;
-    color: var(--text);
-    font-family: 'Courier New', 'Lucida Console', monospace;
-    min-height: 100vh;
-    display: grid;
-    grid-template-rows: auto 1fr auto;
-    overflow-x: hidden;
-  }
-
-  body::before {
-    content: '';
-    position: fixed; inset: 0;
-    background: repeating-linear-gradient(
-      0deg, transparent, transparent 2px,
-      rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px
-    );
-    pointer-events: none;
-    z-index: 1000;
-  }
-
-  /* ── HEADER ── */
-  header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 24px;
-    border-bottom: 1px solid var(--border);
-    background: var(--panel);
-  }
-
-  .logo {
-    font-family: 'Arial Narrow', 'Impact', sans-serif;
-    font-weight: 900;
-    font-size: 1.6rem;
-    letter-spacing: 0.15em;
-    color: var(--accent);
-    text-transform: uppercase;
-  }
-  .logo span { color: var(--dim); font-weight: 300; }
-
-  .status-bar {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    font-size: 0.7rem;
-    letter-spacing: 0.1em;
-    color: var(--dim);
-  }
-
-  .status-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--err);
-    box-shadow: 0 0 6px var(--err);
-    transition: all 0.3s;
-  }
-  .status-dot.live {
-    background: var(--ok);
-    box-shadow: 0 0 8px var(--ok);
-    animation: pulse 2s infinite;
-  }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
-  #hz-counter { color: var(--accent); }
-
-  /* ── MAIN LAYOUT ── */
-  main {
-    display: grid;
-    grid-template-columns: 1fr 300px;
-    gap: 1px;
-    background: var(--border);
-    padding: 1px;
-  }
-
-  /* ── LEFT: two stacked sections ── */
-  .left-col {
-    display: grid;
-    grid-template-rows: 1fr 1fr auto;
-    gap: 1px;
-    background: var(--border);
-  }
-
-  /* Each section has a section header + graphs */
-  .section {
-    background: var(--panel);
-    display: flex;
-    flex-direction: column;
-  }
-
-  .section-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 20px;
-    border-bottom: 1px solid var(--border);
-    background: rgba(0,0,0,0.04);
-  }
-
-  .section-tag {
-    font-family: 'Arial Narrow', 'Impact', sans-serif;
-    font-weight: 900;
-    font-size: 0.7rem;
-    letter-spacing: 0.25em;
-    text-transform: uppercase;
-    padding: 2px 8px;
-    border: 1px solid currentColor;
-  }
-  .section-tag.state { color: var(--roll); border-color: var(--roll); }
-  .section-tag.pid   { color: var(--output); border-color: var(--output); }
-  .section-tag.drive { color: var(--pitch); border-color: var(--pitch); }
-
-  .section-desc {
-    font-size: 0.65rem;
-    color: var(--dim);
-    letter-spacing: 0.1em;
-  }
-
-  .graphs-row {
-    display: grid;
-    flex: 1;
-    gap: 1px;
-    background: var(--border);
-    padding: 1px;
-  }
-  .state-graphs  { grid-template-columns: 1fr 1fr; }
-  .pid-graphs    { grid-template-columns: 1fr 1fr 1fr 1fr; }
-  .drive-graphs  { grid-template-columns: 1fr; }
-
-  .graph-block {
-    background: var(--panel);
-    padding: 12px 16px;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .graph-label {
-    font-family: 'Arial Narrow', 'Impact', sans-serif;
-    font-weight: 600;
-    font-size: 0.6rem;
-    letter-spacing: 0.2em;
-    color: var(--dim);
-    text-transform: uppercase;
-    margin-bottom: 6px;
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-  }
-
-  .graph-label .cur { font-family: 'Share Tech Mono'; font-size: 1rem; letter-spacing: 0; }
-
-  canvas { width: 100%; flex: 1; display: block; min-height: 60px; }
-
-  /* ── RIGHT: readouts + controls ── */
-  .right-col {
-    display: grid;
-    grid-template-rows: auto auto auto 1fr;
-    gap: 1px;
-    background: var(--border);
-  }
-
-  /* Readout groups */
-  .readout-group {
-    background: var(--panel);
-    padding: 14px 16px;
-  }
-
-  .readout-group-title {
-    font-family: 'Arial Narrow', 'Impact', sans-serif;
-    font-size: 0.6rem;
-    letter-spacing: 0.25em;
-    text-transform: uppercase;
-    margin-bottom: 10px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid var(--border);
-  }
-  .readout-group-title.state  { color: var(--roll); }
-  .readout-group-title.pid    { color: var(--output); }
-  .readout-group-title.drive  { color: var(--pitch); }
-
-  .readout-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
-
-  .readout {
-    text-align: center;
-    padding: 8px 4px;
-    background: #f7f9fc;
-    border: 1px solid var(--border);
-  }
-
-  .readout-label {
-    font-family: 'Arial Narrow', 'Impact', sans-serif;
-    font-size: 0.55rem;
-    letter-spacing: 0.2em;
-    color: var(--dim);
-    text-transform: uppercase;
-    margin-bottom: 2px;
-  }
-
-  .readout-value {
-    font-size: 1.3rem;
-    line-height: 1;
-  }
-
-  .readout-unit {
-    font-size: 0.55rem;
-    color: var(--dim);
-    margin-top: 1px;
-  }
-
-  /* Controls */
-  .controls-panel {
-    background: var(--panel);
-    padding: 14px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-  }
-
-  .control-block {}
-
-  .control-title {
-    font-family: 'Arial Narrow', 'Impact', sans-serif;
-    font-weight: 600;
-    font-size: 0.6rem;
-    letter-spacing: 0.2em;
-    color: var(--dim);
-    text-transform: uppercase;
-    margin-bottom: 10px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .input-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 8px;
-  }
-
-  .input-row label {
-    font-size: 0.75rem;
-    color: var(--accent);
-    letter-spacing: 0.1em;
-    min-width: 28px;
-  }
-
-  .input-row input[type="number"] {
-    background: #f7f9fc;
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: 'Courier New', 'Lucida Console', monospace;
-    font-size: 0.85rem;
-    padding: 4px 8px;
-    width: 100px;
-    text-align: right;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  .input-row input[type="number"]:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 1px var(--accent);
-  }
-  input[type=number]::-webkit-inner-spin-button,
-  input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
-  input[type=number] { -moz-appearance: textfield; }
-
-  .btn {
-    width: 100%;
-    padding: 7px;
-    background: transparent;
-    border: 1px solid var(--accent);
-    color: var(--accent);
-    font-family: 'Arial Narrow', 'Impact', sans-serif;
-    font-weight: 600;
-    font-size: 0.75rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    cursor: pointer;
-    margin-top: 8px;
-    transition: all 0.15s;
-  }
-  .btn:hover { background: var(--accent); color: var(--bg); }
-  .btn:active { opacity: 0.7; }
-  .btn-warn { border-color: var(--warn); color: var(--warn); }
-  .btn-warn:hover { background: var(--warn); color: var(--bg); }
-  .btn-stop {
-    border-color: var(--err); color: var(--err);
-    font-size: 0.9rem; padding: 10px;
-    box-shadow: 0 0 8px rgba(204,0,51,0.3);
-  }
-  .btn-stop:hover { background: var(--err); color: var(--bg); box-shadow: 0 0 14px rgba(204,0,51,0.6); }
-  .btn-resume {
-    border-color: var(--ok); color: var(--ok);
-    font-size: 0.9rem; padding: 10px;
-    box-shadow: 0 0 8px rgba(26,138,46,0.3);
-  }
-  .btn-resume:hover { background: var(--ok); color: var(--bg); box-shadow: 0 0 14px rgba(26,138,46,0.6); }
-
-  .flash { animation: flashAnim 0.4s ease; }
-  @keyframes flashAnim {
-    0%   { background: rgba(0,229,255,0.15); }
-    100% { background: transparent; }
-  }
-
-  /* ── FOOTER ── */
-  footer {
-    padding: 7px 24px;
-    border-top: 1px solid var(--border);
-    background: var(--panel);
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.6rem;
-    color: var(--dim);
-    letter-spacing: 0.1em;
-  }
-  #log { color: var(--ok); }
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
+:root{--bg:#09090d;--panel:#10101a;--panel2:#14141f;--border:rgba(255,120,0,0.13);--sep:#1a1a28;--orange:#ff7800;--text:#dde0f0;--muted:#55566a;--green:#00e87a;--red:#ff1f44;--blue:#00b4ff;--yellow:#ffcc00;--purple:#a07aff;--glow:0 0 18px rgba(255,120,0,0.35);}
+body.light{--bg:#eef0f5;--panel:#ffffff;--panel2:#f4f5fa;--border:rgba(180,80,0,0.18);--sep:#e0e2ec;--orange:#cc5500;--text:#12121e;--muted:#8888a0;--green:#0a7a40;--red:#cc0033;--blue:#0060bb;--yellow:#aa8800;--purple:#6644cc;--glow:0 0 10px rgba(180,80,0,0.15);}
+body.light::after{display:none;}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'IBM Plex Mono',monospace;}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.05) 3px,rgba(0,0,0,0.05) 4px);}
+.root{display:grid;grid-template-rows:44px minmax(0,1fr) minmax(0,1.1fr);grid-template-columns:1fr 280px;width:100vw;height:100vh;gap:1px;background:var(--sep);}
+header{grid-column:1/-1;background:var(--panel);display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid var(--border);}
+.logo{font-family:'IBM Plex Sans',system-ui,sans-serif;font-weight:600;font-size:.95rem;letter-spacing:.08em;color:var(--orange);}
+.logo span{color:var(--muted);font-weight:400;font-size:.7rem;letter-spacing:.05em;margin-left:10px;}
+.hdr-right{display:flex;align-items:center;gap:12px;font-size:.7rem;letter-spacing:.03em;color:var(--muted);}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 7px var(--red);transition:all .4s;}
+.dot.live{background:var(--green);box-shadow:0 0 10px var(--green);animation:blink 2s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+#hz{color:var(--orange);font-family:'IBM Plex Mono',monospace;font-size:.62rem;}
+.hdr-btn{background:transparent;border:1px solid var(--border);color:var(--muted);font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:.62rem;letter-spacing:.04em;font-weight:500;padding:3px 8px;cursor:pointer;transition:all .15s;}
+.hdr-btn:hover{border-color:var(--orange);color:var(--orange);}
+.cam-hero{grid-row:2;grid-column:1;background:var(--panel);position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+#cam-feed{width:100%;height:100%;object-fit:cover;display:none;background:#000;}
+#cam-feed.on{display:block;}
+.cam-ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--muted);font-size:.72rem;letter-spacing:.06em;}
+.cam-ph .bb{width:56px;height:56px;border-radius:50%;border:2px solid var(--muted);position:relative;opacity:.35;}
+.cam-ph .bb::before{content:'';position:absolute;top:-14px;left:50%;transform:translateX(-50%);width:34px;height:26px;border-radius:50% 50% 0 0;border:2px solid var(--muted);}
+.cam-overlay{position:absolute;inset:0;pointer-events:none;}
+.cam-overlay::before,.cam-overlay::after{content:'';position:absolute;width:36px;height:36px;border-color:var(--orange);border-style:solid;opacity:.6;}
+.cam-overlay::before{top:14px;left:14px;border-width:2px 0 0 2px;}
+.cam-overlay::after{bottom:14px;right:14px;border-width:0 2px 2px 0;}
+.cam-toggle{position:absolute;top:14px;right:14px;z-index:10;pointer-events:all;background:rgba(0,0,0,.55);border:1px solid var(--orange);color:var(--orange);font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:.62rem;letter-spacing:.05em;font-weight:500;padding:5px 10px;cursor:pointer;transition:all .2s;}
+.cam-toggle:hover{background:var(--orange);color:#fff;}
+body.light .cam-toggle{background:rgba(255,255,255,.75);}
+body.light .cam-toggle:hover{background:var(--orange);color:#fff;}
+.roll-hud{position:absolute;bottom:14px;left:14px;font-family:'IBM Plex Mono',monospace;font-size:.65rem;letter-spacing:.02em;color:var(--orange);opacity:.85;pointer-events:none;}
+.horizon-wrap{position:absolute;inset:0;pointer-events:none;display:flex;align-items:center;justify-content:center;opacity:.2;}
+.horizon-ring{width:100px;height:100px;border-radius:50%;border:1px solid var(--orange);position:relative;overflow:hidden;transition:transform .1s linear;}
+.h-sky{position:absolute;top:0;left:0;right:0;height:50%;background:rgba(0,150,255,.3);}
+.h-gnd{position:absolute;bottom:0;left:0;right:0;height:50%;background:rgba(100,60,0,.3);}
+.h-line{position:absolute;top:50%;left:0;right:0;height:1px;background:var(--orange);}
+.telem{grid-row:3;grid-column:1;background:var(--sep);display:flex;flex-direction:column;gap:1px;}
+.telem-row{display:grid;gap:1px;background:var(--sep);flex:1;min-height:0;}
+.telem-row.top{grid-template-columns:repeat(3,1fr);}
+.telem-row.bot{grid-template-columns:repeat(4,1fr);}
+.tc{background:var(--panel);padding:10px 14px;display:flex;flex-direction:column;min-height:0;}
+.tc-label{font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:.62rem;letter-spacing:.04em;font-weight:500;color:var(--muted);text-transform:uppercase;margin-bottom:3px;}
+.tc-val{font-family:'IBM Plex Mono',monospace;font-size:1.5rem;font-weight:600;line-height:1;font-variant-numeric:tabular-nums;}
+.tc-unit{font-size:.48rem;color:var(--muted);margin-top:2px;margin-bottom:4px;}
+canvas{width:100%;flex:1;display:block;min-height:50px;}
+.right-col{grid-row:2/4;grid-column:2;background:var(--sep);display:flex;flex-direction:column;gap:1px;overflow-y:auto;}
+.right-col::-webkit-scrollbar{width:3px;}
+.right-col::-webkit-scrollbar-thumb{background:var(--border);}
+.joy-wrap{background:var(--panel);padding:12px 14px;display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0;}
+.sec-title{font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:.66rem;letter-spacing:.05em;font-weight:600;color:var(--muted);width:100%;padding-bottom:7px;border-bottom:1px solid var(--border);text-transform:uppercase;}
+.joy-base{width:130px;height:130px;border-radius:50%;background:radial-gradient(circle,var(--panel2) 0%,var(--bg) 100%);border:1px solid var(--border);position:relative;cursor:crosshair;touch-action:none;user-select:none;}
+.joy-base::before{content:'';position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 50% 50%,transparent 30%,rgba(255,120,0,.04) 31%,transparent 32%),linear-gradient(rgba(255,120,0,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,120,0,.06) 1px,transparent 1px);background-size:100% 100%,18px 18px,18px 18px;}
+.joy-thumb{position:absolute;width:40px;height:40px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ff9933,#cc3300);box-shadow:0 0 14px rgba(255,120,0,.55),inset 0 1px 2px rgba(255,255,255,.2);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;}
+.joy-thumb.active{box-shadow:0 0 26px rgba(255,120,0,.9),inset 0 1px 2px rgba(255,255,255,.2);}
+.joy-vals{display:flex;justify-content:space-between;width:130px;font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:var(--muted);font-variant-numeric:tabular-nums;}
+.joy-vals em{color:var(--orange);font-style:normal;}
+.rg{background:var(--panel);padding:12px 14px;flex-shrink:0;}
+.rg-title{font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:.66rem;letter-spacing:.04em;font-weight:600;text-transform:uppercase;margin-bottom:9px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.rg-title.state{color:var(--blue);}.rg-title.pid{color:var(--yellow);}.rg-title.drive{color:var(--orange);}.rg-title.ctrl{color:var(--muted);}.rg-title.head{color:var(--purple);}
+.rdg{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
+.rd{text-align:center;padding:6px 4px;background:var(--panel2);border:1px solid var(--border);}
+.rd-lbl{font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:.45rem;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;margin-bottom:2px;}
+.rd-val{font-family:'IBM Plex Mono',monospace;font-size:1.2rem;font-weight:600;line-height:1;font-variant-numeric:tabular-nums;}
+.rd-unit{font-size:.45rem;color:var(--muted);margin-top:1px;}
+.inp-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.inp-row label{font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:.55rem;color:var(--orange);min-width:28px;}
+.inp-row input[type=number]{flex:1;background:var(--panel2);border:1px solid var(--border);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:.75rem;padding:4px 8px;text-align:right;outline:none;transition:border-color .2s;}
+.inp-row input:focus{border-color:var(--orange);}
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
+input[type=number]{-moz-appearance:textfield;}
+.btn{width:100%;padding:7px;background:transparent;font-family:'IBM Plex Sans',system-ui,sans-serif;font-weight:700;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;transition:all .15s;margin-top:5px;}
+.btn-o{border:1px solid rgba(255,120,0,.4);color:rgba(255,120,0,.8);}
+.btn-o:hover{background:var(--orange);color:#000;border-color:var(--orange);}
+.btn-stop{border:1px solid var(--red);color:var(--red);font-size:.72rem;padding:9px;box-shadow:0 0 8px rgba(255,30,68,.2);}
+.btn-stop:hover{background:var(--red);color:#fff;box-shadow:0 0 18px rgba(255,30,68,.5);}
+.btn-stop.run{border-color:var(--green);color:var(--green);box-shadow:0 0 8px rgba(0,232,122,.2);}
+.btn-stop.run:hover{background:var(--green);color:#000;}
+.btn-row{display:flex;gap:6px;margin-top:6px;}
+.btn-h{flex:1;padding:7px;background:transparent;border:1px solid var(--border);color:var(--muted);font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:.52rem;letter-spacing:.1em;cursor:pointer;transition:all .15s;}
+.btn-h:hover,.btn-h:active{background:var(--orange);border-color:var(--orange);color:#000;}
 </style>
 </head>
 <body>
+<div class="root">
 
 <header>
-  <div class="logo">BB-M8 <span>// CONTROL PANEL</span></div>
-  <div class="status-bar">
-    <div class="status-dot" id="status-dot"></div>
-    <span id="status-text">DISCONNECTED</span>
-    <span>|</span>
-    <span id="hz-counter">-- Hz</span>
+  <div class="logo">BB-M8 <span>// CONTROL</span></div>
+  <div class="hdr-right">
+    <div class="dot" id="dot"></div>
+    <span id="status-txt">OFFLINE</span>
+    <span>|</span><span id="hz">-- Hz</span>
+    <span>|</span><span id="pkt">PKT 0</span>
+    <button class="hdr-btn" onclick="toggleTheme()" id="theme-btn">LIGHT</button>
   </div>
 </header>
 
-<main>
+<div class="cam-hero">
+  <div class="cam-ph" id="cam-ph"><div class="bb"></div><span id="cam-ph-txt">NO FEED</span></div>
+  <img id="cam-feed" src="" alt="">
+  <div class="cam-overlay"></div>
+  <div class="horizon-wrap"><div class="horizon-ring" id="horizon">
+    <div class="h-sky"></div><div class="h-gnd"></div><div class="h-line"></div>
+  </div></div>
+  <button class="cam-toggle" onclick="toggleCam()" id="cam-btn">FEED ON</button>
+  <div class="roll-hud" id="roll-hud">ROLL --.- °  |  PITCH --.- °</div>
+</div>
 
-  <!-- LEFT COLUMN: graphs split into two sections -->
-  <div class="left-col">
-
-    <!-- STATE ESTIMATOR section -->
-    <div class="section">
-      <div class="section-header">
-        <span class="section-tag state">State Estimator</span>
-        <span class="section-desc">IMU · Complementary Filter</span>
-      </div>
-      <div class="graphs-row state-graphs">
-        <div class="graph-block">
-          <div class="graph-label">
-            <span>ROLL</span>
-            <span class="cur" id="val-roll" style="color:var(--roll)">--.-°</span>
-          </div>
-          <canvas id="c-roll"></canvas>
-        </div>
-        <div class="graph-block">
-          <div class="graph-label">
-            <span>PITCH</span>
-            <span class="cur" id="val-pitch" style="color:var(--pitch)">--.-°</span>
-          </div>
-          <canvas id="c-pitch"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <!-- PID section -->
-    <div class="section">
-      <div class="section-header">
-        <span class="section-tag pid">PID Controller</span>
-        <span class="section-desc">Roll Stabilization · Servo Output</span>
-      </div>
-      <div class="graphs-row pid-graphs">
-        <div class="graph-block">
-          <div class="graph-label">
-            <span>OUTPUT</span>
-            <span class="cur" id="val-output" style="color:var(--output)">--.-</span>
-          </div>
-          <canvas id="c-output"></canvas>
-        </div>
-        <div class="graph-block">
-          <div class="graph-label">
-            <span>ERROR</span>
-            <span class="cur" id="val-err" style="color:var(--err)">--.-</span>
-          </div>
-          <canvas id="c-err"></canvas>
-        </div>
-        <div class="graph-block">
-          <div class="graph-label">
-            <span>INTEGRAL</span>
-            <span class="cur" id="val-int" style="color:var(--int)">--.-</span>
-          </div>
-          <canvas id="c-int"></canvas>
-        </div>
-        <div class="graph-block">
-          <div class="graph-label">
-            <span>DERIVATIVE</span>
-            <span class="cur" id="val-der" style="color:var(--der)">--.-</span>
-          </div>
-          <canvas id="c-der"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <!-- DRIVE section -->
-    <div class="section">
-      <div class="section-header">
-        <span class="section-tag drive">Drive Controller</span>
-        <span class="section-desc">Target Speed · Motor Output</span>
-      </div>
-      <div class="graphs-row drive-graphs">
-        <div class="graph-block">
-          <div class="graph-label">
-            <span>SPEED</span>
-            <span class="cur" id="val-drive-speed" style="color:var(--pitch)">-.--</span>
-          </div>
-          <canvas id="c-drive-speed"></canvas>
-        </div>
-      </div>
-    </div>
-
+<div class="telem">
+  <div class="telem-row top">
+    <div class="tc"><div class="tc-label">Roll</div><div class="tc-val" id="tv-roll" style="color:var(--blue)">---</div><div class="tc-unit">degrees</div><canvas id="g-roll"></canvas></div>
+    <div class="tc"><div class="tc-label">Pitch</div><div class="tc-val" id="tv-pitch" style="color:var(--orange)">---</div><div class="tc-unit">degrees</div><canvas id="g-pitch"></canvas></div>
+    <div class="tc"><div class="tc-label">Drive Speed</div><div class="tc-val" id="tv-spd" style="color:var(--green)">---</div><div class="tc-unit">m/s</div><canvas id="g-spd"></canvas></div>
   </div>
+  <div class="telem-row bot">
+    <div class="tc"><div class="tc-label">PID Output</div><div class="tc-val" id="tv-out" style="color:var(--yellow)">---</div><div class="tc-unit">correction</div><canvas id="g-out"></canvas></div>
+    <div class="tc"><div class="tc-label">PID Error</div><div class="tc-val" id="tv-err" style="color:var(--red)">---</div><div class="tc-unit">deg</div><canvas id="g-err"></canvas></div>
+    <div class="tc"><div class="tc-label">Integral</div><div class="tc-val" id="tv-int" style="color:var(--green)">---</div><div class="tc-unit">deg·s</div><canvas id="g-int"></canvas></div>
+    <div class="tc"><div class="tc-label">Derivative</div><div class="tc-val" id="tv-der" style="color:var(--purple)">---</div><div class="tc-unit">deg/s</div><canvas id="g-der"></canvas></div>
+  </div>
+</div>
 
-  <!-- RIGHT COLUMN: readouts + controls -->
-  <div class="right-col">
-
-    <!-- State readouts -->
-    <div class="readout-group">
-      <div class="readout-group-title state">State Estimator</div>
-      <div class="readout-grid">
-        <div class="readout">
-          <div class="readout-label">Roll</div>
-          <div class="readout-value" id="r-roll" style="color:var(--roll)">---</div>
-          <div class="readout-unit">degrees</div>
-        </div>
-        <div class="readout">
-          <div class="readout-label">Pitch</div>
-          <div class="readout-value" id="r-pitch" style="color:var(--pitch)">---</div>
-          <div class="readout-unit">degrees</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- PID readouts -->
-    <div class="readout-group">
-      <div class="readout-group-title pid">PID Controller</div>
-      <div class="readout-grid">
-        <div class="readout">
-          <div class="readout-label">Target</div>
-          <div class="readout-value" id="r-target" style="color:var(--dim)">---</div>
-          <div class="readout-unit">degrees</div>
-        </div>
-        <div class="readout">
-          <div class="readout-label">Output</div>
-          <div class="readout-value" id="r-output" style="color:var(--output)">---</div>
-          <div class="readout-unit">deg corr.</div>
-        </div>
-        <div class="readout">
-          <div class="readout-label">Error</div>
-          <div class="readout-value" id="r-err" style="color:var(--err)">---</div>
-          <div class="readout-unit">degrees</div>
-        </div>
-        <div class="readout">
-          <div class="readout-label">Integral</div>
-          <div class="readout-value" id="r-int" style="color:var(--int)">---</div>
-          <div class="readout-unit">deg·s</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Drive readouts -->
-    <div class="readout-group">
-      <div class="readout-group-title drive">Drive Controller</div>
-      <div class="readout-grid">
-        <div class="readout">
-          <div class="readout-label">Speed</div>
-          <div class="readout-value" id="r-drive-speed" style="color:var(--pitch)">---</div>
-          <div class="readout-unit">m/s</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Controls -->
-    <div class="controls-panel">
-
-      <div class="control-block">
-        <div class="control-title">Safety</div>
-        <button id="btn-stop" class="btn btn-stop" onclick="toggleStop()">STOP</button>
-      </div>
-
-      <div class="control-block">
-        <div class="control-title">Target Roll</div>
-        <div class="input-row">
-          <label>°</label>
-          <input type="number" id="inp-target" value="0" step="0.5">
-        </div>
-        <button class="btn btn-warn" onclick="sendTarget()">SEND TARGET</button>
-      </div>
-
-      <div class="control-block">
-        <div class="control-title">Target Speed</div>
-        <div class="input-row">
-          <label>m/s</label>
-          <input type="number" id="inp-drive-speed" value="0" step="0.05">
-        </div>
-        <button class="btn btn-warn" onclick="sendDriveSpeed()">SEND SPEED</button>
-      </div>
-
-      <div class="control-block">
-        <div class="control-title">Roll PID Gains</div>
-        <div class="input-row">
-          <label>Kp</label>
-          <input type="number" id="inp-kp" value="1.00" step="0.05">
-        </div>
-        <div class="input-row">
-          <label>Ki</label>
-          <input type="number" id="inp-ki" value="0.00" step="0.01">
-        </div>
-        <div class="input-row">
-          <label>Kd</label>
-          <input type="number" id="inp-kd" value="0.05" step="0.005">
-        </div>
-        <button class="btn" onclick="sendRollGains()">APPLY ROLL GAINS</button>
-      </div>
-
+<div class="right-col">
+  <div class="joy-wrap">
+    <div class="sec-title">MOVEMENT</div>
+    <div class="joy-base" id="joy-base"><div class="joy-thumb" id="joy-thumb"></div></div>
+    <div class="joy-vals"><em>SPD <span id="jy">0.00</span></em><em>STR <span id="jx">0.0°</span></em></div>
+  </div>
+  <div class="rg"><div class="rg-title ctrl">Safety</div><button class="btn btn-stop" id="btn-stop" onclick="toggleStop()">STOP</button></div>
+  <div class="rg">
+    <div class="rg-title state">State Estimator</div>
+    <div class="rdg">
+      <div class="rd"><div class="rd-lbl">Roll</div><div class="rd-val" id="r-roll" style="color:var(--blue)">---</div><div class="rd-unit">degrees</div></div>
+      <div class="rd"><div class="rd-lbl">Pitch</div><div class="rd-val" id="r-pitch" style="color:var(--orange)">---</div><div class="rd-unit">degrees</div></div>
     </div>
   </div>
-
-</main>
-
-<footer>
-  <span>ws://192.168.4.1:81</span>
-  <span id="log">READY</span>
-  <span id="pkt-count">PKT: 0</span>
-</footer>
+  <div class="rg">
+    <div class="rg-title pid">PID Controller</div>
+    <div class="rdg">
+      <div class="rd"><div class="rd-lbl">Target</div><div class="rd-val" id="r-tgt" style="color:var(--muted)">---</div><div class="rd-unit">degrees</div></div>
+      <div class="rd"><div class="rd-lbl">Output</div><div class="rd-val" id="r-out" style="color:var(--yellow)">---</div><div class="rd-unit">correction</div></div>
+      <div class="rd"><div class="rd-lbl">Error</div><div class="rd-val" id="r-err" style="color:var(--red)">---</div><div class="rd-unit">degrees</div></div>
+      <div class="rd"><div class="rd-lbl">Integral</div><div class="rd-val" id="r-int" style="color:var(--green)">---</div><div class="rd-unit">deg·s</div></div>
+    </div>
+  </div>
+  <div class="rg"><div class="rg-title drive">Drive</div><div class="rdg"><div class="rd"><div class="rd-lbl">Speed</div><div class="rd-val" id="r-spd" style="color:var(--orange)">---</div><div class="rd-unit">m/s</div></div></div></div>
+  <div class="rg"><div class="rg-title ctrl">Target Roll</div><div class="inp-row"><label>°</label><input type="number" id="inp-tgt" value="0" step="0.5"></div><button class="btn btn-o" onclick="sendTarget()">SEND TARGET</button></div>
+  <div class="rg"><div class="rg-title ctrl">Target Speed</div><div class="inp-row"><label>m/s</label><input type="number" id="inp-spd" value="0" step="0.05"></div><button class="btn btn-o" onclick="sendSpeed()">SEND SPEED</button></div>
+  <div class="rg">
+    <div class="rg-title pid">Roll PID Gains</div>
+    <div class="inp-row"><label>Kp</label><input type="number" id="kp" value="0.90" step="0.05"></div>
+    <div class="inp-row"><label>Ki</label><input type="number" id="ki" value="0.05" step="0.01"></div>
+    <div class="inp-row"><label>Kd</label><input type="number" id="kd" value="0.10" step="0.005"></div>
+    <button class="btn btn-o" onclick="sendPID()">APPLY GAINS</button>
+  </div>
+  <div class="rg">
+    <div class="rg-title head">Head Rotation</div>
+    <div class="inp-row"><label>steps</label><input type="number" id="inp-steps" value="50" step="64"></div>
+    <div class="btn-row">
+      <button class="btn-h" onmousedown="startHead(-1)" onmouseup="stopHead()" ontouchstart="startHead(-1)" ontouchend="stopHead()">CCW</button>
+      <button class="btn-h" onmousedown="startHead(1)" onmouseup="stopHead()" ontouchstart="startHead(1)" ontouchend="stopHead()">CW</button>
+    </div>
+  </div>
+  <div class="rg"><div class="rg-title ctrl">Actions</div><div class="btn-row"><button class="btn-h" onclick="takePhoto()">PHOTO</button><button class="btn-h" onclick="playSound()">SOUND</button></div></div>
+</div>
+</div>
 
 <script>
-  // ── WebSocket ──
-  const WS_URL = 'ws://192.168.4.1:81';
-  let ws, reconnectTimer, pktCount = 0;
-  let lastPktTime = 0, hzBuffer = [];
+const WS_URL='ws://192.168.4.1:81', CAM_URL='http://192.168.4.1:82/stream';
+let ws,pktCount=0,stopped=false,headTimer=null,lastT=0,hzBuf=[];
 
-  function connect() {
-    ws = new WebSocket(WS_URL);
-    ws.onopen  = () => { setStatus(true);  log('CONNECTED'); clearTimeout(reconnectTimer); };
-    ws.onclose = () => { setStatus(false); log('DISCONNECTED — retrying...'); reconnectTimer = setTimeout(connect, 2000); };
-    ws.onerror = () => ws.close();
-    ws.onmessage = (e) => {
-      try {
-        const d = JSON.parse(e.data);
-        updateTelemetry(d);
-        trackHz();
-        document.getElementById('pkt-count').textContent = 'PKT: ' + (++pktCount);
-      } catch {}
-    };
-  }
+// ── FIX #2: Exponential backoff + heartbeat ───────────────────────────────────
+let reconnectDelay=2000, heartbeatTimer=null, lastMsgTime=0;
 
-  function setStatus(live) {
-    document.getElementById('status-dot').classList.toggle('live', live);
-    document.getElementById('status-text').textContent = live ? 'LIVE' : 'DISCONNECTED';
-  }
-
-  function log(msg) { document.getElementById('log').textContent = msg; }
-
-  function trackHz() {
-    const now = performance.now();
-    if (lastPktTime) hzBuffer.push(1000 / (now - lastPktTime));
-    if (hzBuffer.length > 20) hzBuffer.shift();
-    lastPktTime = now;
-    if (hzBuffer.length > 1) {
-      const avg = hzBuffer.reduce((a,b)=>a+b,0) / hzBuffer.length;
-      document.getElementById('hz-counter').textContent = avg.toFixed(1) + ' Hz';
-    }
-  }
-
-  // ── Graphs ──
-  const GRAPH_LEN = 150;
-  const graphs = {
-    roll:        { canvas:'c-roll',         val:'val-roll',         color:'#00e5ff', data:[], range:45   },
-    pitch:       { canvas:'c-pitch',        val:'val-pitch',        color:'#ff6b35', data:[], range:45   },
-    output:      { canvas:'c-output',       val:'val-output',       color:'#ffd700', data:[], range:90   },
-    err:         { canvas:'c-err',          val:'val-err',          color:'#ff3864', data:[], range:45   },
-    int:         { canvas:'c-int',          val:'val-int',          color:'#39ff14', data:[], range:20   },
-    der:         { canvas:'c-der',          val:'val-der',          color:'#a78bfa', data:[], range:50   },
-    driveSpeed:  { canvas:'c-drive-speed',  val:'val-drive-speed',  color:'#ff6b35', data:[], range:1.0  },
+function connect(){
+  ws=new WebSocket(WS_URL);
+  ws.onopen=()=>{
+    setLive(true);
+    reconnectDelay=2000;
+    lastMsgTime=Date.now();
+    clearInterval(heartbeatTimer);
+    // If no message received for 6s, connection has stalled silently → reconnect
+    heartbeatTimer=setInterval(()=>{
+      if(Date.now()-lastMsgTime>6000){ ws.close(); }
+    },3000);
   };
+  ws.onclose=()=>{
+    setLive(false);
+    clearInterval(heartbeatTimer);
+    setTimeout(connect,reconnectDelay);
+    reconnectDelay=Math.min(reconnectDelay*2,30000); // cap at 30s
+  };
+  ws.onerror=()=>ws.close();
+  ws.onmessage=e=>{
+    lastMsgTime=Date.now();
+    // Validate before parse
+    if(typeof e.data!=='string'||!e.data.trim().startsWith('{'))return;
+    try{ onTelemetry(JSON.parse(e.data)); }catch{}
+    const now=performance.now();
+    if(lastT){ hzBuf.push(1000/(now-lastT)); if(hzBuf.length>20)hzBuf.shift(); }
+    lastT=now;
+    if(hzBuf.length>1) document.getElementById('hz').textContent=
+      (hzBuf.reduce((a,b)=>a+b)/hzBuf.length).toFixed(1)+' Hz';
+    document.getElementById('pkt').textContent='PKT '+(++pktCount);
+  };
+}
 
-  function initCanvases() {
-    Object.values(graphs).forEach(g => {
-      const c = document.getElementById(g.canvas);
-      c.width  = c.offsetWidth  * devicePixelRatio;
-      c.height = c.offsetHeight * devicePixelRatio;
-    });
+function setLive(v){ document.getElementById('dot').classList.toggle('live',v);
+  document.getElementById('status-txt').textContent=v?'LIVE':'OFFLINE'; }
+function send(obj){ if(ws&&ws.readyState===WebSocket.OPEN) ws.send(JSON.stringify(obj)); }
+function sv(id,v){ const el=document.getElementById(id); if(el)el.textContent=v; }
+
+// ── Graphs ────────────────────────────────────────────────────────────────────
+const GDEF={
+  roll:{id:'g-roll',range:45,color:'#00b4ff'},pitch:{id:'g-pitch',range:45,color:'#ff7800'},
+  out:{id:'g-out',range:90,color:'#ffcc00'},err:{id:'g-err',range:45,color:'#ff1f44'},
+  int:{id:'g-int',range:20,color:'#00e87a'},der:{id:'g-der',range:50,color:'#a07aff'},
+  spd:{id:'g-spd',range:0.5,color:'#00e87a'}
+};
+Object.values(GDEF).forEach(g=>g.data=[]);
+const LEN=150;
+
+function onTelemetry(d){
+  if(d.state){
+    const r=parseFloat(d.state.roll),p=parseFloat(d.state.pitch);
+    sv('tv-roll',r.toFixed(1)); sv('r-roll',r.toFixed(2));
+    sv('tv-pitch',p.toFixed(1)); sv('r-pitch',p.toFixed(2));
+    document.getElementById('roll-hud').textContent=`ROLL ${r.toFixed(1)}°  |  PITCH ${p.toFixed(1)}°`;
+    document.getElementById('horizon').style.transform=`rotate(${-r}deg)`;
+    push('roll',r); push('pitch',p);
   }
-
-  function drawGraph(g) {
-    const canvas = document.getElementById(g.canvas);
-    const ctx = canvas.getContext('2d');
-    const W = canvas.width, H = canvas.height;
-    ctx.clearRect(0, 0, W, H);
-
-    // Zero line
-    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-    ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(0, H/2); ctx.lineTo(W, H/2); ctx.stroke();
-
-    if (g.data.length < 2) return;
-
-    const grad = ctx.createLinearGradient(0, 0, 0, H);
-    grad.addColorStop(0, g.color + '44');
-    grad.addColorStop(1, g.color + '00');
-
-    ctx.beginPath();
-    g.data.forEach((v, i) => {
-      const x = (i / (GRAPH_LEN-1)) * W;
-      const y = H/2 - (v / g.range) * (H/2) * 0.85;
-      i === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
-    });
-    const lx = ((g.data.length-1)/(GRAPH_LEN-1))*W;
-    ctx.lineTo(lx,H/2); ctx.lineTo(0,H/2); ctx.closePath();
-    ctx.fillStyle = grad; ctx.fill();
-
-    ctx.beginPath();
-    g.data.forEach((v, i) => {
-      const x = (i/(GRAPH_LEN-1))*W;
-      const y = H/2-(v/g.range)*(H/2)*0.85;
-      i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
-    });
-    ctx.strokeStyle = g.color;
-    ctx.lineWidth = 1.5 * devicePixelRatio;
-    ctx.stroke();
+  if(d.pid){
+    const out=parseFloat(d.pid.output),err=parseFloat(d.pid.err),
+          int=parseFloat(d.pid.int),der=parseFloat(d.pid.der),tgt=parseFloat(d.pid.target);
+    sv('tv-err',err.toFixed(1)); sv('r-err',err.toFixed(2));
+    sv('tv-out',out.toFixed(1)); sv('r-out',out.toFixed(2));
+    sv('tv-int',int.toFixed(2)); sv('r-int',int.toFixed(3));
+    sv('tv-der',der.toFixed(1)); sv('r-tgt',tgt.toFixed(2));
+    push('out',out); push('err',err); push('int',int); push('der',der);
   }
+  if(d.drive){ const s=parseFloat(d.drive.speed); sv('tv-spd',s.toFixed(2)); sv('r-spd',s.toFixed(2)); push('spd',s); }
+}
 
-  function updateTelemetry(d) {
-    if (!d.state || !d.pid) return;
+function push(key,v){ const g=GDEF[key]; g.data.push(v); if(g.data.length>LEN)g.data.shift(); drawGraph(g); }
+function drawGraph(g){
+  const c=document.getElementById(g.id); if(!c)return;
+  const ctx=c.getContext('2d'),W=c.width,H=c.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle='rgba(255,120,0,.07)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(0,H/2); ctx.lineTo(W,H/2); ctx.stroke();
+  if(g.data.length<2)return;
+  const grad=ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,g.color+'44'); grad.addColorStop(1,g.color+'00');
+  ctx.beginPath();
+  g.data.forEach((v,i)=>{ const x=(i/(LEN-1))*W,y=H/2-(v/g.range)*(H/2)*.85; i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); });
+  const lx=((g.data.length-1)/(LEN-1))*W;
+  ctx.lineTo(lx,H/2); ctx.lineTo(0,H/2); ctx.closePath(); ctx.fillStyle=grad; ctx.fill();
+  ctx.beginPath();
+  g.data.forEach((v,i)=>{ const x=(i/(LEN-1))*W,y=H/2-(v/g.range)*(H/2)*.85; i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); });
+  ctx.strokeStyle=g.color; ctx.lineWidth=1.5*devicePixelRatio; ctx.stroke();
+}
+function initGraphs(){ Object.values(GDEF).forEach(g=>{
+  const c=document.getElementById(g.id);
+  if(c){ c.width=c.offsetWidth*devicePixelRatio; c.height=c.offsetHeight*devicePixelRatio; } }); }
 
-    // State estimator
-    ['roll','pitch'].forEach(k => {
-      const v = parseFloat(d.state[k]);
-      const g = graphs[k];
-      g.data.push(v); if (g.data.length > GRAPH_LEN) g.data.shift();
-      drawGraph(g);
-      document.getElementById(g.val).textContent = v.toFixed(1) + '°';
-    });
-    document.getElementById('r-roll').textContent  = parseFloat(d.state.roll).toFixed(2);
-    document.getElementById('r-pitch').textContent = parseFloat(d.state.pitch).toFixed(2);
+// ── FIX #3: Throttled joystick + keyboard (no overlap, no spam) ───────────────
+let joyActive=false,jX=0,jY=0;
+const MAX_SPD=0.3,MAX_STR=15;
+let jInterval=null;
+let lastSentSpd=null,lastSentStr=null,lastSendTime=0;
 
-    // Roll PID
-    ['output','err','int','der'].forEach(k => {
-      const v = parseFloat(d.pid[k]);
-      const g = graphs[k];
-      g.data.push(v); if (g.data.length > GRAPH_LEN) g.data.shift();
-      drawGraph(g);
-      document.getElementById(g.val).textContent = v.toFixed(1);
-    });
-    document.getElementById('r-target').textContent = parseFloat(d.pid.target).toFixed(2);
-    document.getElementById('r-output').textContent = parseFloat(d.pid.output).toFixed(2);
-    document.getElementById('r-err').textContent    = parseFloat(d.pid.err).toFixed(2);
-    document.getElementById('r-int').textContent    = parseFloat(d.pid.int).toFixed(3);
+function shouldSend(spd,str){
+  const now=Date.now();
+  return lastSentSpd===null
+    || Math.abs(spd-lastSentSpd)>0.005
+    || Math.abs(str-lastSentStr)>0.1
+    || now-lastSendTime>200;
+}
+function sendMotion(spd,str){
+  if(!shouldSend(spd,str))return;
+  send({driveSpeed:parseFloat(spd.toFixed(3))});
+  send({target:parseFloat(str.toFixed(1))});
+  lastSentSpd=spd; lastSentStr=str; lastSendTime=Date.now();
+}
 
-    // Drive
-    if (d.drive) {
-      const v = parseFloat(d.drive.speed);
-      const g = graphs.driveSpeed;
-      g.data.push(v); if (g.data.length > GRAPH_LEN) g.data.shift();
-      drawGraph(g);
-      document.getElementById('val-drive-speed').textContent = v.toFixed(2);
-      document.getElementById('r-drive-speed').textContent   = v.toFixed(2);
-    }
+const base=document.getElementById('joy-base'),thumb=document.getElementById('joy-thumb');
+function joyPos(e){ const r=base.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
+  const dx=(e.touches?e.touches[0].clientX:e.clientX)-cx,dy=(e.touches?e.touches[0].clientY:e.clientY)-cy;
+  const rad=r.width/2-20,dist=Math.min(Math.sqrt(dx*dx+dy*dy),rad),ang=Math.atan2(dy,dx);
+  return{x:Math.cos(ang)*dist/rad,y:Math.sin(ang)*dist/rad,px:Math.cos(ang)*dist,py:Math.sin(ang)*dist}; }
+function joyStart(e){ e.preventDefault(); joyActive=true; thumb.classList.add('active');
+  jInterval=setInterval(()=>sendMotion(jY*MAX_SPD,jX*MAX_STR),80); joyMove(e); }
+function joyMove(e){ if(!joyActive)return; e.preventDefault(); const p=joyPos(e); jX=p.x; jY=-p.y;
+  thumb.style.transform=`translate(calc(-50% + ${p.px}px), calc(-50% + ${p.py}px))`;
+  document.getElementById('jy').textContent=(jY*MAX_SPD).toFixed(2);
+  document.getElementById('jx').textContent=(jX*MAX_STR).toFixed(1)+'°'; }
+function joyEnd(){ joyActive=false; jX=0; jY=0; thumb.classList.remove('active');
+  thumb.style.transform='translate(-50%,-50%)';
+  document.getElementById('jy').textContent='0.00'; document.getElementById('jx').textContent='0.0°';
+  clearInterval(jInterval); lastSentSpd=null; lastSentStr=null;
+  send({driveSpeed:0,target:0}); }
+
+base.addEventListener('mousedown',joyStart); base.addEventListener('touchstart',joyStart,{passive:false});
+window.addEventListener('mousemove',joyMove); window.addEventListener('touchmove',joyMove,{passive:false});
+window.addEventListener('mouseup',joyEnd); window.addEventListener('touchend',joyEnd);
+
+// Keyboard uses same throttled sender, interval-based (not event-based), blocked when joystick active
+const keys={};
+let keyInterval=null;
+const NAV=['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'];
+document.addEventListener('keydown',e=>{
+  if(keys[e.key])return; keys[e.key]=true;
+  if(!joyActive&&!keyInterval) keyInterval=setInterval(sendKeyMotion,80);
+});
+document.addEventListener('keyup',e=>{
+  delete keys[e.key];
+  if(!NAV.some(k=>keys[k])){ clearInterval(keyInterval); keyInterval=null;
+    lastSentSpd=null; lastSentStr=null; send({driveSpeed:0,target:0}); }
+});
+function sendKeyMotion(){
+  if(joyActive){ clearInterval(keyInterval); keyInterval=null; return; }
+  sendMotion(((keys['ArrowUp']?1:0)-(keys['ArrowDown']?1:0))*MAX_SPD,
+             ((keys['ArrowRight']?1:0)-(keys['ArrowLeft']?1:0))*MAX_STR);
+}
+
+// ── Commands ──────────────────────────────────────────────────────────────────
+function toggleStop(){ stopped=!stopped; send({stop:stopped});
+  const b=document.getElementById('btn-stop'); b.textContent=stopped?'RESUME':'STOP'; b.classList.toggle('run',stopped); }
+function sendTarget(){ send({target:parseFloat(document.getElementById('inp-tgt').value)}); }
+function sendSpeed() { send({driveSpeed:parseFloat(document.getElementById('inp-spd').value)}); }
+function sendPID()   { send({rollKp:parseFloat(document.getElementById('kp').value),rollKi:parseFloat(document.getElementById('ki').value),rollKd:parseFloat(document.getElementById('kd').value)}); }
+function startHead(dir){ stopHead(); const s=parseInt(document.getElementById('inp-steps').value)*dir; send({headStep:s}); headTimer=setInterval(()=>send({headStep:s}),200); }
+function stopHead(){ clearInterval(headTimer); headTimer=null; }
+
+// ── FIX #4: Camera with loading state + error fallback ────────────────────────
+let camOn=false;
+function toggleCam(){
+  const feed=document.getElementById('cam-feed'),ph=document.getElementById('cam-ph'),btn=document.getElementById('cam-btn');
+  if(!camOn){
+    camOn=true; btn.textContent='LOADING...'; btn.style.opacity='0.6';
+    document.getElementById('cam-ph-txt').textContent='LOADING...';
+    feed.src=CAM_URL;
+  } else {
+    camOn=false; feed.src=''; feed.classList.remove('on');
+    ph.style.display='flex'; document.getElementById('cam-ph-txt').textContent='NO FEED';
+    btn.textContent='FEED ON'; btn.style.opacity='1';
   }
+}
+function onCamLoad(){
+  if(!camOn)return;
+  const feed=document.getElementById('cam-feed'),ph=document.getElementById('cam-ph'),btn=document.getElementById('cam-btn');
+  feed.classList.add('on'); ph.style.display='none';
+  btn.textContent='FEED OFF'; btn.style.opacity='1';
+}
+function onCamError(){
+  camOn=false;
+  const feed=document.getElementById('cam-feed'),ph=document.getElementById('cam-ph'),btn=document.getElementById('cam-btn');
+  feed.src=''; feed.classList.remove('on'); ph.style.display='flex';
+  document.getElementById('cam-ph-txt').textContent='FEED ERROR';
+  btn.textContent='RETRY'; btn.style.opacity='1';
+}
 
-  // ── Commands ──
-  let stopped = false;
+function takePhoto(){ window.open('http://192.168.4.1/photo','_blank'); }
+function playSound(){ send({sound:1}); }
+function toggleTheme(){ document.body.classList.toggle('light');
+  document.getElementById('theme-btn').textContent=document.body.classList.contains('light')?'DARK':'LIGHT'; }
 
-  function send(obj) {
-    if (!ws || ws.readyState !== WebSocket.OPEN) { log('NOT CONNECTED'); return; }
-    ws.send(JSON.stringify(obj));
-  }
-
-  function toggleStop() {
-    stopped = !stopped;
-    send({ stop: stopped });
-    const btn = document.getElementById('btn-stop');
-    if (stopped) {
-      btn.textContent = 'RESUME';
-      btn.className = 'btn btn-resume';
-      log('STOP SENT — robot halted');
-    } else {
-      btn.textContent = 'STOP';
-      btn.className = 'btn btn-stop';
-      log('RESUME SENT — robot running');
-    }
-  }
-
-  function sendTarget() {
-    const t = parseFloat(document.getElementById('inp-target').value);
-    send({ target: t });
-    log('TARGET → ' + t.toFixed(1) + '°');
-    flash('inp-target');
-  }
-
-  function sendDriveSpeed() {
-    const v = parseFloat(document.getElementById('inp-drive-speed').value);
-    send({ driveSpeed: v });
-    log('DRIVE SPEED → ' + v.toFixed(2) + ' m/s');
-    flash('inp-drive-speed');
-  }
-
-  function sendRollGains() {
-    const kp = parseFloat(document.getElementById('inp-kp').value);
-    const ki = parseFloat(document.getElementById('inp-ki').value);
-    const kd = parseFloat(document.getElementById('inp-kd').value);
-    send({ rollKp: kp, rollKi: ki, rollKd: kd });
-    log('ROLL GAINS → Kp:' + kp + ' Ki:' + ki + ' Kd:' + kd);
-    flash('inp-kp'); flash('inp-ki'); flash('inp-kd');
-  }
-
-  function flash(id) {
-    const el = document.getElementById(id).parentElement;
-    el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
-  }
-
-  window.addEventListener('load', () => { initCanvases(); connect(); });
-  window.addEventListener('resize', initCanvases);
+window.addEventListener('load',()=>{
+  initGraphs(); connect();
+  const feed=document.getElementById('cam-feed');
+  feed.onload  = onCamLoad;
+  feed.onerror = onCamError;
+});
+window.addEventListener('resize',initGraphs);
 </script>
 </body>
 </html>
