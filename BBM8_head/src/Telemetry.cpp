@@ -76,6 +76,9 @@ void Telemetry::handleMessage(uint8_t* payload, size_t length) {
 
     if (doc.containsKey("stop") && _onStop)
         _onStop((bool)doc["stop"]);
+
+    if (doc.containsKey("headStep") && _onHeadStep)   // ← add here
+        _onHeadStep((int)doc["headStep"]);
 }
 
 void Telemetry::webSocketEvent(uint8_t num, WStype_t type,
