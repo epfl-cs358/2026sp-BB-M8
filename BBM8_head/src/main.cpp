@@ -4,6 +4,13 @@
 #include "Telemetry.hpp"
 #include "EspNowPackets.hpp"
 #include "EspNowConfig.hpp"
+#include <Stepper.h>
+#define IN1 12
+#define IN2 13
+#define IN3 14
+#define IN4 15
+
+Stepper headStepper(2048, IN1, IN3, IN2, IN4); // IN1,IN3,IN2,IN4 order is critical
 
 Telemetry telemetry;
 
@@ -53,6 +60,11 @@ void setup() {
 
     // begin() starts softAP on ESPNOW_CHANNEL, then esp_now_init, then HTTP + WebSocket.
     telemetry.begin();
+
+    headStepper.setSpeed(10);
+    telemetry.onHeadStepChanged([](int steps) {
+        headStepper.step(steps);
+    });
 
     // Register body as ESP-NOW peer (for outgoing CommandPackets).
     esp_now_peer_info_t peer{};
