@@ -41,8 +41,8 @@ public:
     void update(float dt);
 
     // --- Getters ---
-    float getRoll()  const { return _roll;  }
-    float getPitch() const { return _pitch; }
+    float getRoll()  const { return _roll - ROLL_OFFSET;  }
+    float getPitch() const { return _pitch - PITCH_OFFSET; }
 
     float getAccelX() const { return _ax_g; }
     float getAccelY() const { return _ay_g; }
@@ -62,6 +62,10 @@ private:
     // Cached raw values 
     float _ax_g, _ay_g, _az_g;       // Accel in g
     float _gx_ds, _gy_ds, _gz_ds;    // Gyro in degrees/s
+
+    // Offset due to the setup
+    static constexpr float ROLL_OFFSET = 0.0;
+    static constexpr float PITCH_OFFSET = -7.6;
 
     // MPU-9250 register addresses
     static constexpr uint8_t REG_PWR_MGMT_1 = 0x6B;
