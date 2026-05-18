@@ -25,7 +25,7 @@ constexpr float MAX_STEPPER_SPEED = 1300.0f;
 constexpr float ALPHA = 0.98f;
 
 // ---- Safety ----
-bool STOP = false; // Set to true to stop the robot
+bool STOP = true; // Start in stopped mode for safe start
 
 // ---- Module instances ----
 StateEstimator state(ALPHA);
