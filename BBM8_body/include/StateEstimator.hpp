@@ -64,8 +64,8 @@ private:
     float _gx_ds, _gy_ds, _gz_ds;    // Gyro in degrees/s
 
     // Offset due to the setup
-    static constexpr float ROLL_OFFSET = 0.0;
-    static constexpr float PITCH_OFFSET = -7.6;
+    static constexpr float ROLL_OFFSET = 0.0f;
+    static constexpr float PITCH_OFFSET = -5.9f;
 
     // MPU-9250 register addresses
     static constexpr uint8_t REG_PWR_MGMT_1 = 0x6B;

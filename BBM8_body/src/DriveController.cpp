@@ -29,19 +29,17 @@ void DriveController::update(float pitchDeg) {
     if (limited < -_maxSpeed) limited = -_maxSpeed;
 
     if (fabs(limited) <= 20.0f) {
-        _stepper->stopMove();
+        _stepper->forceStop();
         return;
     }
 
     uint32_t absHz = static_cast<uint32_t>(fabsf(limited));
-    uint32_t currHz = _stepper->getSpeedInMilliHz() / 1000;
-    if (fabs(absHz - currHz) > 20){
-        _stepper->setSpeedInHz(absHz);
-        if (limited > 0.0f)
-            _stepper->runForward();
-        else
-            _stepper->runBackward();
-    }
+    _stepper->setSpeedInHz(absHz);
+    if (limited > 0.0f)
+        _stepper->runForward();
+    else
+        _stepper->runBackward();
+
 }
 
 float DriveController::stepsPerM() const {
