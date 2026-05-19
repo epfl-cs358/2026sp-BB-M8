@@ -12,9 +12,9 @@ constexpr uint32_t CONTROL_LOOP_MS = 20; // 50 Hz control loop
 constexpr uint32_t TELEMETRY_INTERVAL_MS = 100; // 10 Hz telemetry rate
 
 // ---- Roll PID gains (!!! TO TUNE !!!) ---- 
-constexpr float KP_ROLL = 0.9f;
-constexpr float KI_ROLL = 0.05f;
-constexpr float KD_ROLL = 0.1f;
+constexpr float KP_ROLL = 0.9f; // 0.9f
+constexpr float KI_ROLL = 0.0f; // 0.05f
+constexpr float KD_ROLL = 0.0f; // 0.1f
 
 // Max stepper speed in steps/second
 // max robot speed = MAX_STEPPER_SPEED * 0.35m * PI / (200 (steps/rev) * 10 (gear ratio))
@@ -80,22 +80,26 @@ void loop() {
     uint32_t now     = millis();
 
     uint32_t elapsedControl = now - lastControlTime;
+
     // Control loop 
-    if (elapsedControl >= CONTROL_LOOP_MS && !STOP) {
-        float dt = elapsedControl / 1000.0f;
+    if (elapsedControl >= CONTROL_LOOP_MS) {
         lastControlTime = now;
+        float dt = elapsedControl / 1000.0f;
 
         // Estimate state
         state.update(dt);
 
-        // Control
-        rollCtrl.update(state.getRoll(), dt);
-        driveCtrl.update(state.getPitch());
+        if (!STOP){
+            // Control
+            rollCtrl.update(state.getRoll(), dt);
+            driveCtrl.update(state.getPitch());
+        }else{
+            driveCtrl.setTargetSpeed(0.0f);
+            driveCtrl.forceStop();
+            Serial.println("---- STOPPED ----");
+            lastControlTime = now;
+        }
 
-    } else if (STOP) {
-        driveCtrl.forceStop();
-        Serial.println("---- STOPPED ----");
-        lastControlTime = now;
     }
 
     uint32_t elapsedTelemetry = now - lastTelemetryTime;

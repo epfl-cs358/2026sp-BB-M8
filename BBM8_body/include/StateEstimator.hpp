@@ -41,8 +41,8 @@ public:
     void update(float dt);
 
     // --- Getters ---
-    float getRoll()  const { return _roll;  }
-    float getPitch() const { return _pitch; }
+    float getRoll()  const { return _roll - ROLL_OFFSET;  }
+    float getPitch() const { return _pitch - PITCH_OFFSET; }
 
     float getAccelX() const { return _ax_g; }
     float getAccelY() const { return _ay_g; }
@@ -58,6 +58,10 @@ private:
     // Estimated angles
     float _roll;
     float _pitch;
+
+    // Offsets
+    static constexpr float ROLL_OFFSET = 0.0f;
+    static constexpr float PITCH_OFFSET = -5.9f;
 
     // Cached raw values 
     float _ax_g, _ay_g, _az_g;       // Accel in g
