@@ -29,7 +29,7 @@ constexpr char WIFI_SSID[] = "BBM8-body";
 constexpr char WIFI_PASS[] = "starwars";
 
 // ---- Safety ----
-bool STOP = false; // Set to true to stop the robot
+bool STOP = true; // Set to true to stop the robot
 
 // ---- Module instances ----
 StateEstimator state(ALPHA);
