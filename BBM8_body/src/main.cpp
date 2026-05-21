@@ -8,7 +8,7 @@
 constexpr int SERVO_PIN = 18; // GPIO pin connected to servo signal wire
 constexpr int STEP_PIN = 25; // GPIO pin connected to A4988 STEP
 constexpr int DIR_PIN  = 26; // GPIO pin connected to A4988 DIR
-constexpr uint32_t CONTROL_LOOP_MS = 20; // 50 Hz control loop
+constexpr uint32_t CONTROL_LOOP_MS = 50; // 20 Hz control loop
 constexpr uint32_t TELEMETRY_INTERVAL_MS = 100; // 10 Hz telemetry rate
 
 // ---- Roll PID gains (!!! TO TUNE !!!) ---- 
@@ -90,7 +90,7 @@ void loop() {
             driveCtrl.update(state.getPitch());
         }else{
             driveCtrl.setTargetSpeed(0.0f);
-            driveCtrl.forceStop();
+            driveCtrl.stopMove();
             Serial.println("---- STOPPED ----");
             lastControlTime = now;
         }

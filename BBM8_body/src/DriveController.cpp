@@ -29,7 +29,7 @@ void DriveController::update(float pitchDeg) {
     if (limited < -_maxSpeed) limited = -_maxSpeed;
 
     if (fabs(limited) <= 20.0f) {
-        _stepper->forceStop();
+        _stepper->stopMove();
         return;
     }
 

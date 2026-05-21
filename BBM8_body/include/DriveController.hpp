@@ -45,6 +45,7 @@ public:
     void setTargetSpeed(float mPerSec) { _targetMPerSec = mPerSec; }
     float getTargetSpeed() const { return _targetMPerSec; }
     void forceStop() { if (_stepper) _stepper->forceStop(); }
+    void stopMove() {if (_stepper) _stepper->stopMove();}
 
 private:
     FastAccelStepperEngine _engine;
