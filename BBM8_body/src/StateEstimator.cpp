@@ -45,7 +45,7 @@ void StateEstimator::update(float dt) {
 
     // Complementary filter:
     // trust gyro short-term, correct long-term drift with accel
-    _roll  = _alpha * (_roll  + _gx_ds * dt) - (1.0f - _alpha) * accelRoll;
+    _roll  = _alpha * (_roll  - _gx_ds * dt) + (1.0f - _alpha) * accelRoll;
     _pitch = _alpha * (_pitch - _gy_ds * dt) - (1.0f - _alpha) * accelPitch;
 }
 
