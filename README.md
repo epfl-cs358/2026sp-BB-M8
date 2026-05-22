@@ -9,7 +9,7 @@
 * [Gaspard Héliot](https://github.com/gheliot)
 * [Khadija Kammoun](https://github.com/khka5)
 * [Gaël Diep](https://github.com/Damedane)
-* [Jérôme](https://github.com/Jess-lnga) <!-- TODO:  -->
+* [Jérôme Essola Elanga](https://github.com/Jess-lnga)
 
 
 
