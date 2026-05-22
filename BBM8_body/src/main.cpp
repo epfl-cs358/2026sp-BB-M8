@@ -5,16 +5,16 @@
 #include "Telemetry.hpp"
 
 // ---- Config ----
-constexpr int SERVO_PIN = 18; // GPIO pin connected to servo signal wire
-constexpr int STEP_PIN = 25; // GPIO pin connected to A4988 STEP
-constexpr int DIR_PIN  = 26; // GPIO pin connected to A4988 DIR
-constexpr uint32_t CONTROL_LOOP_MS = 50; // 20 Hz control loop
+constexpr int SERVO_PIN = 18;
+constexpr int STEP_PIN = 25;
+constexpr int DIR_PIN  = 26;
+constexpr uint32_t CONTROL_LOOP_MS = 50;       // 20 Hz control loop
 constexpr uint32_t TELEMETRY_INTERVAL_MS = 100; // 10 Hz telemetry rate
 
-// ---- Roll PID gains (!!! TO TUNE !!!) ---- 
-constexpr float KP_ROLL = 0.9f; // 0.9f
-constexpr float KI_ROLL = 0.0f; // 0.05f
-constexpr float KD_ROLL = 0.0f; // 0.1f
+// ---- Roll PID gains (!!! TO TUNE !!!) ----
+constexpr float KP_ROLL = 0.9f;
+constexpr float KI_ROLL = 0.0f;
+constexpr float KD_ROLL = 0.0f;
 
 // Max stepper speed in steps/second
 // max robot speed = MAX_STEPPER_SPEED * 0.35m * PI / (200 (steps/rev) * 10 (gear ratio))
@@ -25,7 +25,7 @@ constexpr float MAX_STEPPER_SPEED = 1300.0f;
 constexpr float ALPHA = 0.98f;
 
 // ---- Safety ----
-bool STOP = true; // Start in stopped mode for safe start
+volatile bool STOP = true; // Start in stopped mode for safe start
 
 // ---- Module instances ----
 StateEstimator state(ALPHA);
@@ -33,13 +33,72 @@ RollController rollCtrl(KP_ROLL, KI_ROLL, KD_ROLL, SERVO_PIN);
 DriveController driveCtrl(MAX_STEPPER_SPEED, STEP_PIN, DIR_PIN);
 Telemetry      telemetry;
 
-uint32_t lastControlTime = 0;
-uint32_t lastTelemetryTime = 0;
+// ---- Telemetry snapshot (Core 1 writes, Core 0 reads) ----
+struct TelSnap {
+    float roll, pitch, rollTarget, rollOutput, rollErr, rollIntegral, rollDerivative, driveSpeed;
+} telSnap;
+portMUX_TYPE snapMux = portMUX_INITIALIZER_UNLOCKED;
+
+// ---- Core 1: real-time control (20 Hz) ----
+void controlTask(void*) {
+    TickType_t lastWake = xTaskGetTickCount();
+    constexpr float dt = CONTROL_LOOP_MS / 1000.0f;
+
+    while (true) {
+        state.update(dt);
+
+        if (!STOP) {
+            rollCtrl.update(state.getRoll(), dt);
+            driveCtrl.update(state.getPitch());
+        } else {
+            driveCtrl.setTargetSpeed(0.0f);
+            driveCtrl.stopMove();
+            Serial.println("---- STOPPED ----");
+        }
+
+        portENTER_CRITICAL(&snapMux);
+        telSnap = {
+            state.getRoll(),
+            state.getPitch(),
+            rollCtrl.getTarget(),
+            rollCtrl.pid().getLastOutput(),
+            rollCtrl.pid().getLastError(),
+            rollCtrl.pid().getIntegral(),
+            rollCtrl.pid().getLastDerivative(),
+            driveCtrl.getTargetSpeed()
+        };
+        portEXIT_CRITICAL(&snapMux);
+
+        vTaskDelayUntil(&lastWake, pdMS_TO_TICKS(CONTROL_LOOP_MS));
+    }
+}
+
+// ---- Core 0: telemetry send (10 Hz), co-located with WiFi stack ----
+void telemetryTask(void*) {
+    TickType_t lastWake = xTaskGetTickCount();
+
+    while (true) {
+        TelSnap snap;
+        portENTER_CRITICAL(&snapMux);
+        snap = telSnap;
+        portEXIT_CRITICAL(&snapMux);
+
+        Serial.println("---- sending telemetry ----");
+        telemetry.sendTelemetry(
+            snap.roll, snap.pitch,
+            snap.rollTarget, snap.rollOutput,
+            snap.rollErr, snap.rollIntegral,
+            snap.rollDerivative, snap.driveSpeed
+        );
+
+        vTaskDelayUntil(&lastWake, pdMS_TO_TICKS(TELEMETRY_INTERVAL_MS));
+    }
+}
 
 void setup() {
     Serial.begin(115200);
 
-    while (!state.begin()){
+    while (!state.begin()) {
         Serial.println("[ERROR] MPU-9250 not found. Check wiring.");
     }
     Serial.println("[OK] MPU-9250 initialised.");
@@ -49,7 +108,6 @@ void setup() {
     driveCtrl.begin();
     Serial.println("[OK] DriveController ready.");
 
-    // Register callbacks for incoming commands
     telemetry.onTargetChanged([](float targetDeg) {
         rollCtrl.setTarget(targetDeg);
     });
@@ -62,62 +120,11 @@ void setup() {
     telemetry.onStopChanged([](bool stop) {
         STOP = stop;
     });
-    // Start the WiFi only after registering the callbacks
     telemetry.begin();
 
-    lastControlTime = millis();
-    lastTelemetryTime = millis();
+    xTaskCreatePinnedToCore(controlTask,   "ControlTask",   4096, NULL, 5, NULL, 1);
+    xTaskCreatePinnedToCore(telemetryTask, "TelemetryTask", 4096, NULL, 3, NULL, 0);
+    vTaskDelete(NULL); // delete Arduino init task — tasks are now running
 }
 
-void loop() {
-    // Handle incoming WebSocket messages
-    telemetry.update();
-
-    uint32_t now     = millis();
-
-    uint32_t elapsedControl = now - lastControlTime;
-    // Control loop 
-    if (elapsedControl >= CONTROL_LOOP_MS) {
-        lastControlTime = now;
-        float dt = elapsedControl / 1000.0f;
-
-        // Estimate state
-        state.update(dt);
-
-        if (!STOP){
-            // Control
-            rollCtrl.update(state.getRoll(), dt);
-            driveCtrl.update(state.getPitch());
-        }else{
-            driveCtrl.setTargetSpeed(0.0f);
-            driveCtrl.stopMove();
-            Serial.println("---- STOPPED ----");
-            lastControlTime = now;
-        }
-    }
-
-    uint32_t elapsedTelemetry = now - lastTelemetryTime;
-    // Telemetry loop
-    if (elapsedTelemetry >= TELEMETRY_INTERVAL_MS) {
-        lastTelemetryTime = now;
-        Serial.println("---- sending telemetry ----");
-        // Telemetry over WebSocket
-        telemetry.sendTelemetry(
-            state.getRoll(),
-            state.getPitch(),
-            rollCtrl.getTarget(),
-            rollCtrl.pid().getLastOutput(),
-            rollCtrl.pid().getLastError(),
-            rollCtrl.pid().getIntegral(),
-            rollCtrl.pid().getLastDerivative(),
-            driveCtrl.getTargetSpeed()
-        );
-
-        // Serial print for debugging
-        // Serial.printf("Roll: %6.2f°, Pitch: %6.2f°, Err: %6.2f, Int: %6.2f, Der: %6.2f\n",
-        //               state.getRoll(), state.getPitch(),
-        //               rollCtrl.pid().getLastError(),
-        //               rollCtrl.pid().getIntegral(),
-        //               rollCtrl.pid().getLastDerivative());
-    }
-}
+void loop() {}
