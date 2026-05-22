@@ -48,18 +48,18 @@ Here is a exhausive list of all the elements needed to built the BB-M8. Note tha
 | Driver Motor | ULN2003 | 1 |
 | Servo Motor | ----- | 1 |
 | Stepper Motor | Nema 17 | 1 |
-| Motor Driver | -------- | 1 |
+| Motor Driver | A4988 | 1 |
 | BMS 3S | ------- | 1 |
-| BMS 2S | ------- | 1 |
+| BMS 2S | 2S 20A 18650 Lithium Battery Protection Board | 1 |
 | LIPO | ---- Body | 1 |
-| LIPO | ----- Head | 1 |
+| LIPO |LiPo Akku LEMONRC 350 - 7.4V (35C) | 1 |
 | ON / OFF Switch | ------- | 2 |
-| Speaker | ----- | 1 | <!-- TODO: Remove if not used -->
-| Speaker Thingy | ---- | 1 | <!-- TODO: Remove if not used -->
+| Speaker | ----- | 1 | 
+| Speaker Thingy | ---- | 1 | 
 | Gearbox | ---- | 1 |
 | IMU | ------ | 1 |
 
-
+<!-- TODO: Remove Speaker components if not used -->
 
 | Other Parts | Specifications | Quantity |
 |-----------|---------------------------|-----|
@@ -68,8 +68,8 @@ Here is a exhausive list of all the elements needed to built the BB-M8. Note tha
 | Small Ball Bearing | 3 x 10 x 4 mm | 1 | <!-- TODO: What bearing is in the swinger -->
 | Small Magnets | 5mm diameter, 4 mm hight | 8 |
 | Big Neodymium Magnets | 20 mm diameter, 12 mm hight | 4 |
-| Magnets for Bottom of Head | ------ | 4 |
-| Wheels | ------ | 4 |
+| Magnets for Bottom of Head | 14 mm diameter, 18 mm hight | 4 |
+| Wheels | 13 mm diameter | 4 |
 
 <!-- TODO: Add any missing components-->
 
