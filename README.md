@@ -91,34 +91,56 @@ Here is a exhausive list of all the elements needed to built the BB-M8. Note tha
 The head contains the ESP32 with a camera and has an internal rotation mechanism, to make it turn. An other important aspect of the head is it's iconic look and it's size relative to the sphere, that makes our BB-M8 resemble the original one. 
 
 #### Building the mechanical part:
-The head is divided into different elements: the lid, the bottomplate (holding the magnets), the top plate (where the components are attached) and the manchette (hiding the bottom plate). 
+The head is divided into different elements: the lid, the bottom plate (holding the magnets), the top plate (where the components are attached) and the manchette (hiding the bottom plate). 
 
-1. Print all the 3D printing parts with PETG filament. <!-- TODO: More specifications -->
 
-3. Bottom plate:
+1. Bottom plate:
+    - Print the [bottom Plate](3D-Files/stl/Head_BottomPlate.stl) with PETG filament.
     - Add the **tree inserts**.
-    - Screw the gear to it. 
-4. ESP32 Holder:
-    - Add tree inserts into the holes
-    - Then glue it into the lid, so that the holdes for the camera lines up.
+    - Screw the [gear](3D-Files\stl\Head_GearBottomPlate.stl) to it.
+    - Put the magnets and the wheels into the holes.
+    - 🫟 The bottom plate and the gear can be printed in one piece. 
+
 5. Lid: 
+    - Print the [bottom of the lid](3D-Files\stl\Head_BottomPartLid.stl) and two times the [top of the lid](3D-Files\stl\Head_TopPartLid.stl).
     - Screw the two top parts together.
     - Then screw it to the rest of the lid.
-    - Glue the samll magnets into the holes
+    - Glue the samll magnets into the holes. 
+    - 🫟 The holes where the top is connected to the bottom do not perfectly line up, so if you want to have it more beautiful, change it.
+    - 🫟 Theoretically, the lid could be printed in one piece with the front side of the ESP32 Holder directly attached to it. 
 
+4. ESP32 Holder:
+    - Print the two parts of the ESP32 Holder, [front](3D-Files\stl\Head_ESP32HolderFrontSide.stl) and [back](3D-Files\stl\Head_ESP32HolderBackSide.stl).
+    - Add tree inserts into the holes
+    - Then glue it into the lid, so that the holdes for the camera line up.
+     
 6. Top Plate:
-    - Laser cut the parts using **4mm MDF**.
+    - Laser cut the [top plate](3D-Files\dfx\Head_TopPlate.dxf) with the [stepper holder](3D-Files\dfx\Head_TopPlateStepper.dxf) and two times its [side](3D-Files\dfx\Head_TopPlateSides.dxf) using **4mm MDF**.
     - Glue the parts together.
-    - Glue small magnets into the four holes at the edge
+    - Glue small magnets into the four holes at the edge.
     - Glue a small ball bearing into the hole in the middle, **pay attention that no glue drips into the bearing!**
     - Once the [electronic assembly](#electronic-assembly-of-the-head) is done, screw it onto the plate.
-        - Before attatching the stepper, make sure to add the gear.
+        - Make sure that the screws don't interfer with the magnets and wheels of the bottom plate.
+        - Before attatching the stepper, make sure to print and add the [gear](3D-Files\stl\Head_GearForStepper.stl) and also depending on the size of the screw head, carf the edges so that they are not in the way of the gear.
     - Add bit of velcro to the LIPO and the counterpart to the plate.
+
+7. Final Assembly:
+    - Print and then glue the [ball bearing stopper](3D-Files\stl\Head_BallBearingStopper.stl) to a small bar (that fits the ball bearing perfectly). Then slide it through the ball bearing and into the gear of the bottom plate, line it up with the other gear and the attach it with a screw. 
+    - 🫟 The attachement of the bearing can be done more properly by using a rings and creating a shaft. <!-- TODO: Better explenation -->
+
+8. Manchette:
+    - Print the [manchette](3D-Files\stl\Head_Manchette.stl)
+    - Add four M2.5 inserts into the four holes.
+    - Screw it to the top plate.
+
+Now the head can be easily opend and closed with the magnets!
+
 
 <!-- TODO: Continue-->
 
 #### Electronic Assembly of the head:
 <!-- TODO: Add scema of the electronic assembly !!!!!!! add the BMS -->
+
 
 1. Calibrate the **buck convertor to 5V**.
 2. Solder the connector of the LIPO to the BMS and make sure that is works correctly.
