@@ -454,7 +454,7 @@ let joyActive=false,jX=0,jY=0; let jInterval=null;
 function maxSpd(){ return parseFloat(document.getElementById('max-spd').value)||0.3; }
 function maxStr(){ return parseFloat(document.getElementById('max-str').value)||15; }
 function minSpd(){ return parseFloat(document.getElementById('min-spd').value)||0; }
-function applyMinSpd(v){ if(v===0)return 0; const m=minSpd(); return v>0?Math.max(v,m):Math.min(v,-m); }
+function applyMinSpd(v){ if(v===0)return 0; const mn=minSpd(),mx=maxSpd(),t=Math.abs(v)/mx; return (v>0?1:-1)*(mn+t*(mx-mn)); }
 const base=document.getElementById('joy-base'),thumb=document.getElementById('joy-thumb');
 function joyPos(e){ const r=base.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
   const dx=(e.touches?e.touches[0].clientX:e.clientX)-cx,dy=(e.touches?e.touches[0].clientY:e.clientY)-cy;
