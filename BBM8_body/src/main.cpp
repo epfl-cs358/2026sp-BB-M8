@@ -8,6 +8,7 @@
 constexpr int SERVO_PIN = 18;
 constexpr int STEP_PIN = 25;
 constexpr int DIR_PIN  = 26;
+constexpr int ENABLE_PIN = 17;
 constexpr uint32_t CONTROL_LOOP_MS = 50;       // 20 Hz control loop
 constexpr uint32_t TELEMETRY_INTERVAL_MS = 100; // 10 Hz telemetry rate
 
@@ -30,7 +31,7 @@ volatile bool STOP = true; // Start in stopped mode for safe start
 // ---- Module instances ----
 StateEstimator state(ALPHA);
 RollController rollCtrl(KP_ROLL, KI_ROLL, KD_ROLL, SERVO_PIN);
-DriveController driveCtrl(MAX_STEPPER_SPEED, STEP_PIN, DIR_PIN);
+DriveController driveCtrl(MAX_STEPPER_SPEED, STEP_PIN, DIR_PIN, ENABLE_PIN);
 Telemetry      telemetry;
 
 // ---- Telemetry snapshot (Core 1 writes, Core 0 reads) ----
@@ -52,7 +53,7 @@ void controlTask(void*) {
             driveCtrl.update(state.getPitch());
         } else {
             driveCtrl.setTargetSpeed(0.0f);
-            driveCtrl.stopMove();
+            driveCtrl.forceStop();
             Serial.println("---- STOPPED ----");
         }
 
