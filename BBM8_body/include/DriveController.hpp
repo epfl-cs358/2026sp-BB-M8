@@ -22,7 +22,7 @@
 class DriveController {
 public:
     static constexpr int   STEPS_PER_REV    = 200;
-    static constexpr float GEAR_RATIO       = 10.0f;
+    static constexpr float GEAR_RATIO       = 10.0f / 1.5f;
     static constexpr float SPHERE_DIAMETER_M = 0.35f;
 
     // Pitch safety limit (degrees). If |pitch| exceeds this, speed command is zeroed

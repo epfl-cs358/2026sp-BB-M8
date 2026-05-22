@@ -18,7 +18,8 @@ constexpr float KI_ROLL = 0.0f;
 constexpr float KD_ROLL = 0.0f;
 
 // Max stepper speed in steps/second
-// max robot speed = MAX_STEPPER_SPEED * 0.35m * PI / (200 (steps/rev) * 10 (gear ratio))
+// max robot speed = MAX_STEPPER_SPEED / ((STEPS_PER_REV * GEAR_RATIO) / (SPHERE_DIAMETER_M * PI))
+//                 = 1300 / ((200 * 6.667) / (0.35 * PI)) ≈ 1.07 m/s
 constexpr float MAX_STEPPER_SPEED = 1300.0f;
 
 // ---- Complementary filter coefficient (!!! TO TUNE !!!) ----
