@@ -45,7 +45,7 @@ public:
 
     void setTargetSpeed(float mPerSec) { _targetMPerSec = mPerSec; }
     float getTargetSpeed() const { return _targetMPerSec; }
-    void forceStop() { if (_stepper) _stepper->stopMove(); }
+    void stopMove() { if (_stepper) _stepper->stopMove(); }
     void runForward() { if (_stepper) _stepper->runForward(); }
 
 private:

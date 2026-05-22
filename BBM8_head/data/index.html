@@ -185,7 +185,7 @@ input[type=number]{ -moz-appearance:textfield; }
 .joy-limits .inp-row{ margin-bottom:0; }
 </style>
 </head>
-<body>
+<body class="light">
 <div class="root">
 
 <!-- HEADER -->
@@ -196,7 +196,7 @@ input[type=number]{ -moz-appearance:textfield; }
     <span id="status-txt">OFFLINE</span>
     <span>|</span><span id="hz">-- Hz</span>
     <span>|</span><span id="pkt">PKT 0</span>
-    <button class="hdr-btn" onclick="toggleTheme()" id="theme-btn">LIGHT</button>
+    <button class="hdr-btn" onclick="toggleTheme()" id="theme-btn">DARK</button>
   </div>
 </header>
 
@@ -273,12 +273,17 @@ input[type=number]{ -moz-appearance:textfield; }
     <div class="joy-limits">
       <div class="inp-row">
         <label>max spd</label>
-        <input type="number" id="max-spd" value="0.3" step="0.05" min="0.05" max="2">
+        <input type="number" id="max-spd" value="1.0" step="0.05" min="0.05" max="2">
+        <span class="inp-unit">m/s</span>
+      </div>
+      <div class="inp-row">
+        <label>min spd</label>
+        <input type="number" id="min-spd" value="0.6" step="0.01" min="0" max="0.6">
         <span class="inp-unit">m/s</span>
       </div>
       <div class="inp-row">
         <label>max str</label>
-        <input type="number" id="max-str" value="15" step="1" min="1" max="45">
+        <input type="number" id="max-str" value="18" step="1" min="1" max="20">
         <span class="inp-unit">°</span>
       </div>
     </div>
@@ -306,7 +311,7 @@ input[type=number]{ -moz-appearance:textfield; }
   <!-- SAFETY -->
   <div class="rg">
     <div class="rg-title ctrl">Safety</div>
-    <button class="btn btn-stop" id="btn-stop" onclick="toggleStop()">STOP</button>
+    <button class="btn btn-stop run" id="btn-stop" onclick="toggleStop()">RESUME</button>
   </div>
 
   <!-- STATE READOUTS -->
@@ -366,7 +371,7 @@ input[type=number]{ -moz-appearance:textfield; }
 
 <script>
 const WS_URL='ws://192.168.4.1:81', CAM_URL='http://192.168.4.1:82/stream';
-let ws,pktCount=0,stopped=false,headTimer=null,lastT=0,hzBuf=[];
+let ws,pktCount=0,stopped=true,headTimer=null,lastT=0,hzBuf=[];
 
 function connect(){
   ws=new WebSocket(WS_URL);
@@ -448,6 +453,8 @@ function initGraphs(){ Object.values(GDEF).forEach(g=>{
 let joyActive=false,jX=0,jY=0; let jInterval=null;
 function maxSpd(){ return parseFloat(document.getElementById('max-spd').value)||0.3; }
 function maxStr(){ return parseFloat(document.getElementById('max-str').value)||15; }
+function minSpd(){ return parseFloat(document.getElementById('min-spd').value)||0; }
+function applyMinSpd(v){ if(v===0)return 0; const m=minSpd(); return v>0?Math.max(v,m):Math.min(v,-m); }
 const base=document.getElementById('joy-base'),thumb=document.getElementById('joy-thumb');
 function joyPos(e){ const r=base.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
   const dx=(e.touches?e.touches[0].clientX:e.clientX)-cx,dy=(e.touches?e.touches[0].clientY:e.clientY)-cy;
@@ -456,20 +463,20 @@ function joyPos(e){ const r=base.getBoundingClientRect(),cx=r.left+r.width/2,cy=
 function joyStart(e){ e.preventDefault(); joyActive=true; thumb.classList.add('active'); jInterval=setInterval(sendJoy,80); joyMove(e); }
 function joyMove(e){ if(!joyActive)return; e.preventDefault(); const p=joyPos(e); jX=p.x; jY=-p.y;
   thumb.style.transform=`translate(calc(-50% + ${p.px}px), calc(-50% + ${p.py}px))`;
-  document.getElementById('jy').textContent=(jY*maxSpd()).toFixed(2);
+  document.getElementById('jy').textContent=applyMinSpd(jY*maxSpd()).toFixed(2);
   document.getElementById('jx').textContent=(jX*maxStr()).toFixed(1)+'°'; }
 function joyEnd(){ joyActive=false; jX=0; jY=0; thumb.classList.remove('active');
   thumb.style.transform='translate(-50%,-50%)';
   document.getElementById('jy').textContent='0.00'; document.getElementById('jx').textContent='0.0°';
   clearInterval(jInterval); send({driveSpeed:0,target:0}); }
-function sendJoy(){ if(!joyActive)return; send({driveSpeed:parseFloat((jY*maxSpd()).toFixed(3))}); send({target:parseFloat((jX*maxStr()).toFixed(1))}); }
+function sendJoy(){ if(!joyActive)return; send({driveSpeed:parseFloat(applyMinSpd(jY*maxSpd()).toFixed(3))}); send({target:parseFloat((jX*maxStr()).toFixed(1))}); }
 base.addEventListener('mousedown',joyStart); base.addEventListener('touchstart',joyStart,{passive:false});
 window.addEventListener('mousemove',joyMove); window.addEventListener('touchmove',joyMove,{passive:false});
 window.addEventListener('mouseup',joyEnd); window.addEventListener('touchend',joyEnd);
 const keys={};
 document.addEventListener('keydown',e=>{ if(keys[e.key])return; keys[e.key]=true; updateKeys(); });
 document.addEventListener('keyup',e=>{ delete keys[e.key]; updateKeys(); });
-function updateKeys(){ if(!joyActive){ send({driveSpeed:((keys['ArrowUp']?1:0)-(keys['ArrowDown']?1:0))*maxSpd()}); send({target:((keys['ArrowRight']?1:0)-(keys['ArrowLeft']?1:0))*maxStr()}); } }
+function updateKeys(){ if(!joyActive){ send({driveSpeed:applyMinSpd(((keys['ArrowUp']?1:0)-(keys['ArrowDown']?1:0))*maxSpd())}); send({target:((keys['ArrowRight']?1:0)-(keys['ArrowLeft']?1:0))*maxStr()}); } }
 
 // commands
 function toggleStop(){ stopped=!stopped; send({stop:stopped});

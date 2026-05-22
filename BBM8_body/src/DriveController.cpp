@@ -18,7 +18,7 @@ void DriveController::begin() {
         _stepper->setEnablePin(static_cast<uint8_t>(_enablePin)); // active LOW (A4988 default)
         _stepper->setAutoEnable(true); // energize on move, de-energize when stopped
     }
-    _stepper->setAcceleration(2000);
+    _stepper->setAcceleration(1500);
     _stepper->setSpeedInHz(0); // Intialized with zero speed
 }
 
@@ -33,7 +33,7 @@ void DriveController::update(float pitchDeg) {
     if (limited < -_maxSpeed) limited = -_maxSpeed;
 
     if (fabs(limited) <= 20.0f) {
-        _stepper->forceStop();
+        _stepper->stopMove();
         return;
     }
 

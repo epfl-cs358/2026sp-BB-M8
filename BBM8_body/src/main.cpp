@@ -53,7 +53,7 @@ void controlTask(void*) {
             driveCtrl.update(state.getPitch());
         } else {
             driveCtrl.setTargetSpeed(0.0f);
-            driveCtrl.forceStop();
+            driveCtrl.stopMove();
             Serial.println("---- STOPPED ----");
         }
 
