@@ -12,11 +12,12 @@
  * Pitch is used as a safety limiter to prevent the body from rotating around the main axis.
  *
  * Wiring:
- *   A4988 STEP → STEP_PIN
- *   A4988 DIR  → DIR_PIN
- *   A4988 GND  → GND
- *   A4988 VDD  → 3.3V
- *   A4988 VMOT → motor supply (8-35V)
+ *   A4988 STEP   → STEP_PIN
+ *   A4988 DIR    → DIR_PIN
+ *   A4988 ENABLE → ENABLE_PIN (active LOW — HIGH disables coils)
+ *   A4988 GND    → GND
+ *   A4988 VDD    → 3.3V
+ *   A4988 VMOT   → motor supply (8-35V)
  */
 class DriveController {
 public:
@@ -32,7 +33,7 @@ public:
      * @param stepPin   A4988 STEP pin
      * @param dirPin    A4988 DIR pin
      */
-    DriveController(float maxSpeed, int stepPin, int dirPin);
+    DriveController(float maxSpeed, int stepPin, int dirPin, int enablePin = -1);
 
     void begin();
 
@@ -44,13 +45,15 @@ public:
 
     void setTargetSpeed(float mPerSec) { _targetMPerSec = mPerSec; }
     float getTargetSpeed() const { return _targetMPerSec; }
-    void forceStop() { if (_stepper) _stepper->forceStop(); }
+    void forceStop() { if (_stepper) _stepper->stopMove(); }
+    void runForward() { if (_stepper) _stepper->runForward(); }
 
 private:
     FastAccelStepperEngine _engine;
     FastAccelStepper*      _stepper;
     int   _stepPin;
     int   _dirPin;
+    int   _enablePin;
     float _maxSpeed;
     float _targetMPerSec;
 

@@ -6,8 +6,9 @@
 
 // ---- Config ----
 constexpr int SERVO_PIN = 18; // GPIO pin connected to servo signal wire
-constexpr int STEP_PIN = 25; // GPIO pin connected to A4988 STEP
-constexpr int DIR_PIN  = 26; // GPIO pin connected to A4988 DIR
+constexpr int STEP_PIN   = 25; // GPIO pin connected to A4988 STEP
+constexpr int DIR_PIN    = 26; // GPIO pin connected to A4988 DIR
+constexpr int ENABLE_PIN = 17; // GPIO pin connected to A4988 ENABLE (active LOW)
 constexpr uint32_t CONTROL_LOOP_MS = 20; // 50 Hz control loop
 constexpr uint32_t TELEMETRY_INTERVAL_MS = 100; // 10 Hz telemetry rate
 
@@ -34,7 +35,7 @@ bool STOP = true; // Set to true to stop the robot
 // ---- Module instances ----
 StateEstimator state(ALPHA);
 RollController rollCtrl(KP_ROLL, KI_ROLL, KD_ROLL, SERVO_PIN);
-DriveController driveCtrl(MAX_STEPPER_SPEED, STEP_PIN, DIR_PIN);
+DriveController driveCtrl(MAX_STEPPER_SPEED, STEP_PIN, DIR_PIN, ENABLE_PIN);
 Telemetry      telemetry(WIFI_SSID, WIFI_PASS);
 
 uint32_t lastControlTime = 0;
