@@ -97,12 +97,12 @@ The head is divided into different elements: the lid, the bottom plate (holding 
 1. Bottom plate:
     - Print the [bottom Plate](3D-Files/stl/Head_BottomPlate.stl) with PETG filament.
     - Add the **tree inserts**.
-    - Screw the [gear](3D-Files\stl\Head_GearBottomPlate.stl) to it.
+    - Screw the [gear](3D-Files/stl/Head_GearBottomPlate.stl) to it.
     - Put the magnets and the wheels into the holes.
     - 🫟 The bottom plate and the gear can be printed in one piece. 
 
 5. Lid: 
-    - Print the [bottom of the lid](3D-Files\stl\Head_BottomPartLid.stl) and two times the [top of the lid](3D-Files\stl\Head_TopPartLid.stl).
+    - Print the [bottom of the lid](3D-Files/stl/Head_BottomPartLid.stl) and two times the [top of the lid](3D-Files/stl/Head_TopPartLid.stl).
     - Screw the two top parts together.
     - Then screw it to the rest of the lid.
     - Glue the samll magnets into the holes. 
@@ -110,26 +110,26 @@ The head is divided into different elements: the lid, the bottom plate (holding 
     - 🫟 Theoretically, the lid could be printed in one piece with the front side of the ESP32 Holder directly attached to it. 
 
 4. ESP32 Holder:
-    - Print the two parts of the ESP32 Holder, [front](3D-Files\stl\Head_ESP32HolderFrontSide.stl) and [back](3D-Files\stl\Head_ESP32HolderBackSide.stl).
-    - Add tree inserts into the holes
+    - Print the two parts of the ESP32 Holder, [front](3D-Files/stl/Head_ESP32HolderFrontSide.stl) and [back](3D-Files/stl/Head_ESP32HolderBackSide.stl).
+    - Add tree inserts into the holes.
     - Then glue it into the lid, so that the holdes for the camera line up.
      
 6. Top Plate:
-    - Laser cut the [top plate](3D-Files\dfx\Head_TopPlate.dxf) with the [stepper holder](3D-Files\dfx\Head_TopPlateStepper.dxf) and two times its [side](3D-Files\dfx\Head_TopPlateSides.dxf) using **4mm MDF**.
+    - Laser cut the [top plate](3D-Files/dfx/Head_TopPlate.dxf) with the [stepper holder](3D-Files/dfx/Head_TopPlateStepper.dxf) and two times its [side](3D-Files/dfx/Head_TopPlateSides.dxf) using **4mm MDF**.
     - Glue the parts together.
     - Glue small magnets into the four holes at the edge.
     - Glue a small ball bearing into the hole in the middle, **pay attention that no glue drips into the bearing!**
     - Once the [electronic assembly](#electronic-assembly-of-the-head) is done, screw it onto the plate.
         - Make sure that the screws don't interfer with the magnets and wheels of the bottom plate.
-        - Before attatching the stepper, make sure to print and add the [gear](3D-Files\stl\Head_GearForStepper.stl) and also depending on the size of the screw head, carf the edges so that they are not in the way of the gear.
+        - Before attatching the stepper, make sure to print and add the [gear](3D-Files/stl/Head_GearForStepper.stl) and also depending on the size of the screw head, carf the edges so that they are not in the way of the gear.
     - Add bit of velcro to the LIPO and the counterpart to the plate.
 
 7. Final Assembly:
-    - Print and then glue the [ball bearing stopper](3D-Files\stl\Head_BallBearingStopper.stl) to a small bar (that fits the ball bearing perfectly). Then slide it through the ball bearing and into the gear of the bottom plate, line it up with the other gear and the attach it with a screw. 
+    - Print and then glue the [ball bearing stopper](3D-Files/stl/Head_BallBearingStopper.stl) to a small bar (that fits the ball bearing perfectly). Then slide it through the ball bearing and into the gear of the bottom plate, line it up with the other gear and the attach it with a screw. 
     - 🫟 The attachement of the bearing can be done more properly by using a rings and creating a shaft. <!-- TODO: Better explenation -->
 
 8. Manchette:
-    - Print the [manchette](3D-Files\stl\Head_Manchette.stl)
+    - Print the [manchette](3D-Files/stl/Head_Manchette.stl)
     - Add four M2.5 inserts into the four holes.
     - Screw it to the top plate.
 
