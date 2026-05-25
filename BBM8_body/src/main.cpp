@@ -55,7 +55,7 @@ void controlTask(void*) {
         } else {
             driveCtrl.setTargetSpeed(0.0f);
             driveCtrl.stopMove();
-            Serial.println("---- STOPPED ----");
+            // Serial.println("---- STOPPED ----");
         }
 
         portENTER_CRITICAL(&snapMux);
