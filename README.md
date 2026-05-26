@@ -183,8 +183,24 @@ The sphere itself is 3D-printed in multiple smaller parts so that it can easily 
 
 | stl file | Quantity |
 |-----------|------------|
+| [caps](3D-Files/stl/Sphere_Cap.stl) | 2 |
+| [bones](3D-Files/stl/Sphere-Bone.stl) | 8 |
+| [equator piece](3D-Files/stl/Sphere_Equator.stl)| 4 |
+| [top yellow piece](3D-Files/stl/Sphere-TopYellowPart.stl) | 8 |
+| [white parts](3D-Files/stl/Sphere_WhitePart.stl) | 6 |
+| [opening lid](3D-Files/stl/Sphere_Lid.stl) | 2 |
+| [lid surrounding](3D-Files/stl/Sphere_LidSurrounding.stl) | 2 |
+| [junction with axis](3D-Files/stl/sphere_axisJunction.stl) | 2 |
 
+Once all parts are printed, glue the pieces together. It is important to keep **1/8 open** so that the inner body still can be placed inside. Also **do not** glue the caps to the rest of the sphere. 
+Note that the axis junction sits super tightly in the caps, so there is no need to glue int inside.
 
+<!-- TODO: Explaining the closing mechanism (right now it is just tape) -->
 
+<p align="center">
+    <img src="Images/Opend_sphere.jpeg" width="50%" />
+</p>
+
+<!-- TODO: Photo of closed sphere-->
 
 ## Controlling the BB-M8
