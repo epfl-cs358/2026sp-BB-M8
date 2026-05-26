@@ -176,7 +176,16 @@ Now the head can be easily opend and closed with the magnets!
 
 
 
-### Inner Body
+### Main Body 
+The main body is a wooden box with a few holes to put a Servo, and has the importent duty to hold the axis, the nema, the poll for the head, and the swinger. It is the centerpiece of the project. 
+<!-- TODO: Add photos -->
+
+#### Building the mechanical part 
+The parts to make are : the box, by laser cutting 8mm MDF; the IMU holder, 3d printed; the nema holder, 3d printed; the cap for the pin that holds the second arm of the swinger, 3d printed; and the poll for the head holder. 
+
+1. The box:
+- Use the following DXF file to cut it: [Large side](3D-Files/dxf/SideBoxLarge.dxf) x1, [Large side with servo](3D-Files/dxf/SideBoxLargeServoHole.dxf) x1, [Large side](3D-Files/dxf/SideBoxWithHoleForAxis.dxf) x2
+- then be carefull to glue it with 90° angles, 
 
 ### Sphere
 The sphere itself is 3D-printed in multiple smaller parts so that it can easily be printed on a normal sized Prusa. You need to print the following parts in PETG filament:
@@ -204,3 +213,6 @@ Note that the axis junction sits super tightly in the caps, so there is no need 
 <!-- TODO: Photo of closed sphere-->
 
 ## Controlling the BB-M8
+
+
+
