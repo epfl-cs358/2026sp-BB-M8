@@ -66,6 +66,9 @@ void Telemetry::dispatchCommand(const CommandPacket& pkt) {
         case CMD_STOP:
             if (_onStop) _onStop(pkt.stop != 0);
             break;
+        case CMD_PITCH_LIMITER:
+            if (_onPitchLimiter) _onPitchLimiter(pkt.stop != 0, pkt.target);
+            break;
         default:
             break;
     }

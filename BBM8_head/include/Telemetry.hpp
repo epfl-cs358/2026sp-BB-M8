@@ -33,11 +33,12 @@ public:
     // Called by main.cpp ESP-NOW recv handler with a packet from the body.
     void forwardTelemetry(const TelemetryPacket& pkt);
 
-    void onTargetChanged(void (*cb)(float targetDeg))                   { _onTarget    = cb; }
-    void onRollGainsChanged(void (*cb)(float kp, float ki, float kd))   { _onRollGains = cb; }
-    void onDriveSpeedChanged(void (*cb)(float mPerSec))                 { _onDriveSpeed= cb; }
-    void onStopChanged(void (*cb)(bool stop))                           { _onStop      = cb; }
-    void onHeadRotateChanged(void (*cb)(int steps))                     { _onHeadRotate= cb; }
+    void onTargetChanged(void (*cb)(float targetDeg))                   { _onTarget       = cb; }
+    void onRollGainsChanged(void (*cb)(float kp, float ki, float kd))   { _onRollGains    = cb; }
+    void onDriveSpeedChanged(void (*cb)(float mPerSec))                 { _onDriveSpeed   = cb; }
+    void onStopChanged(void (*cb)(bool stop))                           { _onStop         = cb; }
+    void onHeadRotateChanged(void (*cb)(int steps))                     { _onHeadRotate   = cb; }
+    void onPitchLimiterChanged(void (*cb)(bool enabled, float maxDeg))  { _onPitchLimiter = cb; }
 
     bool isConnected() const { return _clientCount > 0; }
 
@@ -51,6 +52,7 @@ private:
     void (*_onDriveSpeed)(float)                = nullptr;
     void (*_onStop)(bool)                       = nullptr;
     void (*_onHeadRotate)(int)                  = nullptr;
+    void (*_onPitchLimiter)(bool, float)        = nullptr;
 
     void handleMessage(uint8_t* payload, size_t length);
     void webSocketEvent(uint8_t num, WStype_t type, uint8_t* payload, size_t length);

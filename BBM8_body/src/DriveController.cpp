@@ -54,6 +54,7 @@ float DriveController::mPerSecToSteps(float mPerSec) const {
 }
 
 float DriveController::applyPitchLimiter(float speedCommand, float pitchDeg) {
-    float factor = constrain(1.0f - abs(pitchDeg) / MAX_PITCH_DEG, 0.0f, 1.0f);
+    if (!_pitchLimiterEnabled) return speedCommand;
+    float factor = constrain(1.0f - abs(pitchDeg) / _maxPitchDeg, 0.0f, 1.0f);
     return speedCommand * factor;
 }

@@ -27,10 +27,11 @@ public:
         float rollTarget, float rollOutput, float rollErr, float rollIntegral, float rollDerivative,
         float driveSpeed);
 
-    void onTargetChanged(void (*cb)(float targetDeg))               { _onTarget     = cb; }
-    void onRollGainsChanged(void (*cb)(float kp, float ki, float kd)) { _onRollGains = cb; }
-    void onDriveSpeedChanged(void (*cb)(float mPerSec))             { _onDriveSpeed  = cb; }
-    void onStopChanged(void (*cb)(bool stop))                       { _onStop        = cb; }
+    void onTargetChanged(void (*cb)(float targetDeg))                  { _onTarget        = cb; }
+    void onRollGainsChanged(void (*cb)(float kp, float ki, float kd))  { _onRollGains     = cb; }
+    void onDriveSpeedChanged(void (*cb)(float mPerSec))                { _onDriveSpeed    = cb; }
+    void onStopChanged(void (*cb)(bool stop))                          { _onStop          = cb; }
+    void onPitchLimiterChanged(void (*cb)(bool enabled, float maxDeg)) { _onPitchLimiter  = cb; }
 
     bool isConnected() const { return _peerRegistered; }
 
@@ -41,6 +42,7 @@ private:
     void (*_onRollGains)(float, float, float)   = nullptr;
     void (*_onDriveSpeed)(float)                = nullptr;
     void (*_onStop)(bool)                       = nullptr;
+    void (*_onPitchLimiter)(bool, float)        = nullptr;
 
     void dispatchCommand(const CommandPacket& pkt);
 

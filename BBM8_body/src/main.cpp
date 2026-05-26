@@ -122,6 +122,10 @@ void setup() {
     telemetry.onStopChanged([](bool stop) {
         STOP = stop;
     });
+    telemetry.onPitchLimiterChanged([](bool enabled, float maxDeg) {
+        driveCtrl.setPitchLimiterEnabled(enabled);
+        driveCtrl.setMaxPitchDeg(maxDeg);
+    });
     telemetry.begin();
 
     xTaskCreatePinnedToCore(controlTask,   "ControlTask",   4096, NULL, 5, NULL, 1);

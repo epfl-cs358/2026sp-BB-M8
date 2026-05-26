@@ -81,6 +81,11 @@ void Telemetry::handleMessage(uint8_t* payload, size_t length) {
 
     if (doc.containsKey("headStep") && _onHeadRotate)
         _onHeadRotate((int)doc["headStep"]);
+
+    if (doc.containsKey("pitchLimiterEnabled") && _onPitchLimiter) {
+        float maxDeg = doc.containsKey("maxPitchDeg") ? (float)doc["maxPitchDeg"] : 20.0f;
+        _onPitchLimiter((bool)doc["pitchLimiterEnabled"], maxDeg);
+    }
 }
 
 void Telemetry::webSocketEvent(uint8_t num, WStype_t type,

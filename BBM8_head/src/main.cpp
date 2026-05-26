@@ -10,9 +10,11 @@
 Telemetry telemetry;
 
 // Mirrors the browser's stopped flag so we can re-send it after a body reset.
-static volatile bool     s_stopped     = true;
-static volatile uint32_t s_lastTelemMs = 0;
-static bool              s_bodyLost    = true;  // true until first telemetry arrives
+static volatile bool     s_stopped              = true;
+static volatile bool     s_pitchLimiterEnabled  = false;
+static volatile float    s_maxPitchDeg          = 20.0f;
+static volatile uint32_t s_lastTelemMs          = 0;
+static bool              s_bodyLost             = true;  // true until first telemetry arrives
 
 // ── ESP-NOW: send a CommandPacket to the body ────────────────────────────────
 static void sendCommand(const CommandPacket& cmd) {
@@ -25,12 +27,19 @@ void onEspNowRecv(const uint8_t* /*mac*/, const uint8_t* data, int len) {
     const auto* pkt = reinterpret_cast<const TelemetryPacket*>(data);
     if (pkt->type != PacketType::TELEMETRY) return;
 
-    // If body was lost (reset/brownout), push current stop state so it syncs.
+    // If body was lost (reset/brownout), push current state so it syncs.
     if (s_bodyLost) {
         CommandPacket sync{};
         sync.cmdType = CMD_STOP;
         sync.stop    = s_stopped ? 1u : 0u;
         sendCommand(sync);
+
+        CommandPacket pitchSync{};
+        pitchSync.cmdType = CMD_PITCH_LIMITER;
+        pitchSync.stop    = s_pitchLimiterEnabled ? 1u : 0u;
+        pitchSync.target  = s_maxPitchDeg;
+        sendCommand(pitchSync);
+
         s_bodyLost = false;
     }
     s_lastTelemMs = millis();
@@ -71,6 +80,15 @@ void setup() {
     });
     telemetry.onHeadRotateChanged([](int steps) {
         headRotation_step(steps);
+    });
+    telemetry.onPitchLimiterChanged([](bool enabled, float maxDeg) {
+        s_pitchLimiterEnabled = enabled;
+        s_maxPitchDeg         = maxDeg;
+        CommandPacket cmd{};
+        cmd.cmdType = CMD_PITCH_LIMITER;
+        cmd.stop    = enabled ? 1u : 0u;
+        cmd.target  = maxDeg;
+        sendCommand(cmd);
     });
 
     // begin() starts softAP on ESPNOW_CHANNEL, then esp_now_init, then HTTP + WebSocket.

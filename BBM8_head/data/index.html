@@ -356,6 +356,14 @@ input[type=number]{ -moz-appearance:textfield; }
     <button class="btn btn-o" onclick="sendSpeed()">SEND SPEED</button>
   </div>
 
+  <!-- PITCH LIMITER -->
+  <div class="rg">
+    <div class="rg-title drive">Pitch Limiter</div>
+    <button class="btn btn-stop" id="btn-pitch-lim" onclick="togglePitchLimiter()">DISABLED</button>
+    <div class="inp-row"><label>max °</label><input type="number" id="inp-max-pitch" value="20" step="1" min="1" max="90"></div>
+    <button class="btn btn-o" onclick="sendMaxPitch()">SET MAX PITCH</button>
+  </div>
+
   <!-- PID GAINS -->
   <div class="rg">
     <div class="rg-title pid">Roll PID Gains</div>
@@ -371,7 +379,7 @@ input[type=number]{ -moz-appearance:textfield; }
 
 <script>
 const WS_URL='ws://192.168.4.1:81', CAM_URL='http://192.168.4.1:82/stream';
-let ws,pktCount=0,stopped=true,headTimer=null,lastT=0,hzBuf=[];
+let ws,pktCount=0,stopped=true,pitchLimiterEnabled=false,headTimer=null,lastT=0,hzBuf=[];
 
 function connect(){
   ws=new WebSocket(WS_URL);
@@ -481,6 +489,10 @@ function updateKeys(){ if(!joyActive){ send({driveSpeed:applyMinSpd(((keys['Arro
 // commands
 function toggleStop(){ stopped=!stopped; send({stop:stopped});
   const b=document.getElementById('btn-stop'); b.textContent=stopped?'RESUME':'STOP'; b.classList.toggle('run',stopped); }
+function togglePitchLimiter(){ pitchLimiterEnabled=!pitchLimiterEnabled;
+  const b=document.getElementById('btn-pitch-lim'); b.textContent=pitchLimiterEnabled?'ENABLED':'DISABLED'; b.className=pitchLimiterEnabled?'btn btn-o':'btn btn-stop';
+  send({pitchLimiterEnabled,maxPitchDeg:parseFloat(document.getElementById('inp-max-pitch').value)}); }
+function sendMaxPitch(){ send({pitchLimiterEnabled,maxPitchDeg:parseFloat(document.getElementById('inp-max-pitch').value)}); }
 function sendTarget(){ send({target:parseFloat(document.getElementById('inp-tgt').value)}); }
 function sendSpeed(){ send({driveSpeed:parseFloat(document.getElementById('inp-spd').value)}); }
 function sendPID(){ send({rollKp:parseFloat(document.getElementById('kp').value),rollKi:parseFloat(document.getElementById('ki').value),rollKd:parseFloat(document.getElementById('kd').value)}); }
