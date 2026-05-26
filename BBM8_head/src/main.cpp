@@ -9,6 +9,11 @@
 
 Telemetry telemetry;
 
+// Mirrors the browser's stopped flag so we can re-send it after a body reset.
+static volatile bool     s_stopped     = true;
+static volatile uint32_t s_lastTelemMs = 0;
+static bool              s_bodyLost    = true;  // true until first telemetry arrives
+
 // ── ESP-NOW: send a CommandPacket to the body ────────────────────────────────
 static void sendCommand(const CommandPacket& cmd) {
     esp_now_send(BODY_MAC, reinterpret_cast<const uint8_t*>(&cmd), sizeof(cmd));
@@ -19,6 +24,17 @@ void onEspNowRecv(const uint8_t* /*mac*/, const uint8_t* data, int len) {
     if (len < static_cast<int>(sizeof(TelemetryPacket))) return;
     const auto* pkt = reinterpret_cast<const TelemetryPacket*>(data);
     if (pkt->type != PacketType::TELEMETRY) return;
+
+    // If body was lost (reset/brownout), push current stop state so it syncs.
+    if (s_bodyLost) {
+        CommandPacket sync{};
+        sync.cmdType = CMD_STOP;
+        sync.stop    = s_stopped ? 1u : 0u;
+        sendCommand(sync);
+        s_bodyLost = false;
+    }
+    s_lastTelemMs = millis();
+
     telemetry.forwardTelemetry(*pkt);
 }
 
@@ -47,6 +63,7 @@ void setup() {
         sendCommand(cmd);
     });
     telemetry.onStopChanged([](bool s) {
+        s_stopped = s;
         CommandPacket cmd{};
         cmd.cmdType = CMD_STOP;
         cmd.stop    = s ? 1u : 0u;
@@ -83,4 +100,6 @@ void setup() {
 
 void loop() {
     telemetry.update();
+    if (!s_bodyLost && (millis() - s_lastTelemMs > 1000u))
+        s_bodyLost = true;
 }
