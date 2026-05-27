@@ -34,6 +34,14 @@
       - [Building the mechanical part:](#building-the-mechanical-part-1)
     - [Main Body](#main-body)
       - [Building the mechanical part:](#building-the-mechanical-part-2)
+    - [Swinger](#swinger)
+      - [Building the mechanical part:](#building-the-mechanical-part-3)
+      - [Electronic Assembly of the swinger:](#electronic-assembly-of-the-swinger)
+    - [Poll](#poll)
+      - [Building the mechanical part:](#building-the-mechanical-part-4)
+    - [Final assembly of the interior body](#final-assembly-of-the-interior-body)
+      - [Building the mechanical part:](#building-the-mechanical-part-5)
+      - [Electronic Assembly of the interior body:](#electronic-assembly-of-the-interior-body)
     - [Sphere](#sphere)
   - [Controlling the BB-M8](#controlling-the-bb-m8)
 
@@ -202,6 +210,7 @@ The axis is divided into different elements: the rode, the gear, the bearings, t
 
 2. Gear: 
     - 3D Print the [gear](3D-Files/stl/Axis_GearMainPart.stl) and two times the [second part of the gear](3D-Files/stl/Axis_GearSecondPart.stl).
+    - Add 4 M2.5 inserts 
     - With 4 M2.5x16 screws and 4 M2.5nuts, tighten the gear around the axis.
     - 🫟 For now do not tighten them to the max so that you can easily move it around and find the right positio nonce the main body is done.
     - 🫟 Keep in mind that all the axis will have to be disassembled and reassembled in to the actual main body, so this is just to test and make sur all parts work.
@@ -212,6 +221,7 @@ The axis is divided into different elements: the rode, the gear, the bearings, t
      
 4. Stop rings:
     - 3D print 4 times the [stop rings](3D-Files/stl/Axis_StopRing.stl).
+    - Add 4 M2.5 inserts 
     - With 4 M2.5x16 screws and 4 M2.5nuts, tighten the stop rings around the axis.
     - Remember to follow the first screen shot to put everything in the right order.
 
@@ -237,38 +247,124 @@ The main body is essentially a wooden box with a few holes to put a Servo, and h
 </p>
 
 #### Building the mechanical part:
-The main body is divided into multiple parts: the box, the IMU holder, the two nema holders, the stepper and its gearbox, the Servo, and the pin that holds the second arm of the swinger.
+The main body is divided into multiple parts: the box, the IMU holder, the two nema holders, the stepper and its gearbox, the gear on the gearbox shaft, the Servo, and the pin that holds the second arm of the swinger.
 
 
 1. Box:
-- On an 8mm thickness sheet of MDF, laser cut one [Large side](3D-Files/dxf/SideBoxLarge.dxf), one [Large side with servo](3D-Files/dxf/SideBoxLargeServoHole.dxf), and two [Sides with holes for axis](3D-Files/dxf/SideBoxWithHoleForAxis.dxf).
-- then be carefull to glue everything together with 90° angles (easier said than done!).
+    - On an 8mm thickness sheet of MDF, laser cut one [Large side](3D-Files/dxf/SideBoxLarge.dxf), one [Large side with servo](3D-Files/dxf/SideBoxLargeServoHole.dxf), and two [Sides with holes for axis](3D-Files/dxf/SideBoxWithHoleForAxis.dxf).
+    - then be carefull to glue everything together with 90° angles (easier said than done!).
 
-1. IMU holder: 
+2. IMU holder: 
     - 3Print the [IMU holder](3D-Files/stl/MainBody_IMUHolder.stl)
     - put it into place with 2 M3x10 screws and 2 M3 nuts 
 
-2. Nema holders:
+3. Nema holders:
     - 3D print one [Nema holder Servo side back](3D-Files/stl/MainBody_NemaHolderAttachementServoSide.stl), one [Nema holder Cap side back](3D-Files/stl/MainBody_NemaHolderAttachementCapSide.stl) and one [Nema holder](3D-Files/stl/MainBody_NemaHolder.stl). All of these three will attache the nema to the center of the box. First assemble this.
     - Then the next three part are going to prevent the Nema's shaft from bending and loosing the contact between the two gears.
     - 3D print two [Nema holder front](3D-Files/stl/MainBody_NemaHolderShaft.stl)and one [Nema holder front screwed](3D-Files/stl/MainBody_NemaHolderScrewed.stl). Assemble these last three pieces together. 
      
-3. Stepper & Gearbox:
+4. Stepper & Gearbox:
     - Assemble the Nema117 with the Gearbox, and make sure the Nema Shaft is tightened on the gearbox input.
     - Assemble the Nema17 with the Nema holders using 9 M2.5x10 for the holders themselves, and 9 M3x12 to connect the holders on the MDF box.
     - 🫟 Make sure the socket of the Nema is looking down.
+  
+5. Gear shaft:
+    - 3D print this [gear](3D-Files/stl/MainBody_GearShaft.stl), make sure you put at lleast 90% infill to avoid an embarassing breaking of the gear.
+    - Put the gear on the shaft of the gearbox and screw an M3x16 screw with an M3 nuts that you're going to fit in the hole extruded for it.
 
-4. Servo:
+6. Servo:
     - Add the Servo in his hole. Make sure its cables are looking down. 
     - Screw it with 4 M3x12 screws and 4 M3 nuts.  
 
-5. Pin:
+7. Pin:
     - Buy a pin that is 3mm diameter and 40mm long.
     - Put it inside the hole that is facing the Servo on the opposite side of the box.
     - 🫟 This pin will hold the second arm of the Swinger 
     
 
 Now the Main Body is done, let's build the Swinger!
+
+### Swinger
+The Swinger is a very technical part; it'll hold all the electronics, and swing thanks to the Servo to make the BB8 turn and balance. 
+
+<p align="center">
+    <img src="Images/Swinger_illustration1.png" width="33%" />
+    <img src="Images/Swinger_illustration3.png" width="33%" />
+    <img src="Images/Swinger_illustration2.png" width="33%" />
+</p>
+
+#### Building the mechanical part:
+The Swinger is essentially a rectangular MDF sheet with holes to screw all the electronics, velcro under to stick the LiPo, and arms to connect to the main body. It will hold the BMS inside a BMS box, the 2 buck converters, the ESP32, the NEMA's driver, and some wago.
+
+1. MDF Sheet
+   - On a 6mm MDF plate, Laser cut this [sheet](3D-Files/dxf/Swinger_Sheet.dxf).
+2. BMS Box
+   - 3D print the [BMS Box](3D-Files/stl/Swinger_BMSBoxBox.stl) and its [Bottom](3D-Files/stl/Swinger_BMSBoxBottom.stl)
+   - After soldering the cables and connectors, put the BMS inside the Box, and screw the box and bottom to the MDF sheet with 2 M2.5x10 screws.
+3. Arms
+   - 3D print the [Servo arm](3D-Files/stl/Swinger_ArmServo.stl) and the [Cap arm](3D-Files/stl/Swinger_ArmBearing.stl).
+   - In the servo arm, put the Servo horn that fits the extruded shape.
+   - In the Cap arm, add a 10x3x4 bearing in the extruded cylinder shape.
+   - Screw the 2 arms with 2 M2.5x12 and 2 M2.5 nuts for each arms on the sheet of MDF.
+4. Cap 
+   - 3D print the [Cap](3D-Files/stl/Swinger_ArmCap.stl).
+   - Screw it with 2 M2.5x12 and 2 M2.5 nuts on the Cap arm.
+5. LiPo
+   - Put some velcro under the Swinger and on the LiPo to make them stick 
+6. Weight
+   - Add the weight around the LiPo by hot-glueing it
+7. Electronic components
+   - Add all the electronic components on the MDF sheet and make sure they are well screwed.
+   - 🫟 Remember that the LiPo is right under the electronic components, therefore, there shouldn't be any screws sticking too much out to avoid damaging the LiPo
+
+#### Electronic Assembly of the swinger:
+<-- TODO: Add the electronic assembly of the swinger-->
+
+### Poll
+The poll is the part that sticks from the main body to hold magnets that will attach the head. 
+
+#### Building the mechanical part:
+The poll is divided into three elements: the body attachement, the poll and the magnets holder.
+
+1. Body attachement
+   - 3D print the [body attachement](3D-Files/stl/Poll_BodyAttachement.stl), and put an M2.5 insert inside the hole.
+   - Add an M2.5x12 screw.
+2. Poll 
+   - Cut a 20mm diameter rode to 135mm (use a pipe type, not a full rode, the goal is to avoid putting too much wieght high up).
+3. Magnets holder
+   - 3D print the [magnets holder](3D-Files/stl/Poll_MagnetHolder.stl),put an M2.5 insert inside the hole, then add the M2.5x12 screw.
+   - Put the magnets inside, then tape them, and put some hot glue on the back to avoid having the magnets escaping.
+
+### Final assembly of the interior body
+Now that you've successfully built each part of the interior of the body succesfully, it's time to assemble them.
+
+#### Building the mechanical part:
+1. Axis & Main body 
+   - Slide the Axis into the Main body, and, when half way sliding it, add all the components of the axis that will be inside the box.
+   - It may be slightly difficult to correctly aligne the two gears, but it is perfectly normal.
+   - Make sure to tighten all the screw very well (without breaking the inserts).
+<p align="center">
+    <img src="Images/Axis+MainBody_illustration1.png" width="40%" />
+    <img src="Images/Axis+MainBody_illustration2.png" width="40%" />
+</p>
+2. Poll
+   - Screw the whole poll part to the main body with 4 M2.5x12 screws and 4 M2.5 nuts
+3. Swinger 
+   - Connect now the swinger with the rest by clipping the Servo into its horn, and secure it with its screw, and on the other side, slide the pin through the arm cap, and through its bearing.
+<p align="center">
+    <img src="Images/InteriorBody_illustration1.png" width="40%" />
+    <img src="Images/InteriorBody_illustration2.png" width="40%" />
+</p>
+
+#### Electronic Assembly of the interior body:
+1. Servo 
+   - Connect the Servo to its dedicated wires
+2. IMU
+   - Connect the IMU to its dedicated wires
+3. Nema 
+  - Connect the Nema to its dedicated wires
+
+You now have the whole interior body. All thats left is to put it inside the sphere, and... voilà!
 
 
 
