@@ -186,7 +186,7 @@ Now the head can be easily opend and closed with the magnets!
 ### Axis
 The Axis is the part that will transmitt the rotation from the stepper to the sphere. It is made of aluminum to make sure it doesn't bend, it also holds a gear that should be making the axis turn, 2 bearings that will hold the main body and avoid friction, 4 stop rings that will make sure the bearings stay in place, and the box doesn't slip out of the bearing, and finaly a junction in 2 parts that will be the attachement of the axis to the body.  
 
-![Axis Illustration](Images/Axis_Illustration.png)
+![Axis Illustration](Images/Axis_illustration.png)
 
 
 #### Building the mechanical part:
