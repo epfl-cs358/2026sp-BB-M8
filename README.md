@@ -30,8 +30,10 @@
     - [Head](#head)
       - [Building the mechanical part:](#building-the-mechanical-part)
       - [Electronic Assembly of the head:](#electronic-assembly-of-the-head)
+    - [Axis](#axis)
+      - [Building the mechanical part:](#building-the-mechanical-part-1)
     - [Main Body](#main-body)
-      - [Building the mechanical part](#building-the-mechanical-part-1)
+      - [Building the mechanical part](#building-the-mechanical-part-2)
     - [Sphere](#sphere)
   - [Controlling the BB-M8](#controlling-the-bb-m8)
 
@@ -181,7 +183,51 @@ Now the head can be easily opend and closed with the magnets!
     - Make sure that the **cables connecting the ESP32 are long** enough to easily open the lid of the head. 
 
 
+### Axis
+The Axis is the part that will transmitt the rotation from the stepper to the sphere. It is made of aluminum to make sure it doesn't bend, it also holds a gear that should be making the axis turn, 2 bearings that will hold the main body and avoid friction, 4 stop rings that will make sure the bearings stay in place, and the box doesn't slip out of the bearing, and finaly a junction in 2 parts that will be the attachement of the axis to the body.  
 
+<p align="center">
+  <img src="Images/Axis_Illustration.png" width="50%" />
+</p>
+
+
+#### Building the mechanical part:
+The axis is divided into different elements: the rode, the gear, the bearings, the stop rings, the first junction, and the second junction. 
+
+
+1. Rode:
+    - Get yourself a 310mm aluminum rode with diameter 10.
+    - Drill holes and thread them with a lathe at the two ends of the rode for M2.5 Screws. The holes should be around 5mm deep
+    - Make a 10mm D shape at the 2 ends, and make sure the 2 ends have D shapes facing the exact same direction.
+    - 🫟 The deepness of the holes, and the lenght of the D shapes can be a bit bigger and it will totally work. Just don't make them smaller.
+    - 🫟 If you need visual support, [here](3D-Files/stl/Axis_Rode.stl) is an STL file, but DO NOT PRINT IT, it won't be resistant enough!  
+
+2. Gear: 
+    - Print the [gear](3D-Files/stl/Axis_GearMainPart.stl) and two times the [second part of the gear](3D-Files/stl/Axis_GearSecondPart.stl).
+    - With 4 M2.5x16 screws and 4 M2.5nuts, tighten the gear around the axis.
+    - 🫟 For now do not tighten them to the max so that you can easily move it around and find the right positio nonce the main body is done.
+    - 🫟 Keep in mind that all the axis will have to be disassembled and reassembled in to the actual main body, so this is just to test and make sur all parts work.
+
+3. Bearings:
+    - Buy two bearings of size 35x10x11.
+    - You'll put them on the rode on each side after adding the two first stop rings (next step).
+     
+4. Stop rings:
+    - 3D print 4 times the [stop rings](3D-Files/stl/Axis_StopRing.stl).
+    - With 4 M2.5x16 screws and 4 M2.5nuts, tighten the stop rings around the axis.
+    - Remember to follow the first screen shot to put everything in the right order.
+
+5. First junction:
+    - 3D print 2 times the [first junction](3D-Files/stl/Axis_JunctionWithSphere.stl).
+    - Put it in the D shape of each ends, and screw it to the bar with an M2.5x10  
+    - 🫟 If you cannot find a screw that perfectly tighten the junction, just add nuts until it has the desired lenght (and very the lenght of the screw) 
+
+6. Second junction:
+    - 3D print 2 times the [second junction](3D-Files/stl/Axis_JunctionToJunction.stl).
+    - Just clip it on the first junction.
+    
+
+Now the Axis is done, you'll have to disassemble it and reassemble it in the main body once you're sure each component of the axis is well made!
 
 
 
@@ -198,6 +244,7 @@ The parts to make are : the box, by laser cutting 8mm MDF; the IMU holder, 3d pr
 
 ### Sphere
 The sphere itself is 3D-printed in multiple smaller parts so that it can easily be printed on a normal sized Prusa. You need to print the following parts in PETG filament:
+
 | stl file | Quantity |
 |-----------|------------|
 | [caps](3D-Files/stl/Sphere_Cap.stl) | 2 |
@@ -207,22 +254,15 @@ The sphere itself is 3D-printed in multiple smaller parts so that it can easily 
 | [white parts](3D-Files/stl/Sphere_WhitePart.stl) | 6 |
 | [opening lid](3D-Files/stl/Sphere_Lid.stl) | 2 |
 | [lid surrounding](3D-Files/stl/Sphere_LidSurrounding.stl) | 2 |
-
+| [junction with axis](3D-Files/stl/sphere_axisJunction.stl) | 2 |
 
 Once all parts are printed, glue the pieces together. It is important to keep **1/8 open** so that the inner body still can be placed inside. Also **do not** glue the caps to the rest of the sphere. 
+Note that the axis junction sits super tightly in the caps, so there is no need to glue int inside.
 
-#### Builting the sphere
-- 1. 3D-Print all the parts.
-- 2. Glue the pieces together with hot glue.
-    - It is important to keep **1/8 open** so that the inner body still can be placed inside.
-    - **Do not** glue the caps to the rest of the sphere. 
- 
-- 3. Place the [main body](#main-body) inside and make sure that it has enough space.
-- 4. Put the second cap on top, close the last part and attach it with tape.
-
+<!-- TODO: Explaining the closing mechanism (right now it is just tape) -->
 
 <p align="center">
-    <img src="Images/Sphere_open.jpeg" width="50%" />
+    <img src="Images/Opend_sphere.jpeg" width="50%" />
 </p>
 
 <!-- TODO: Photo of closed sphere-->
