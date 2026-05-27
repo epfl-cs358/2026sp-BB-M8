@@ -44,16 +44,20 @@
       - [Electronic Assembly of the interior body:](#electronic-assembly-of-the-interior-body)
     - [Sphere](#sphere)
   - [Controlling the BB-M8](#controlling-the-bb-m8)
+    - [Flashing the code](#flashing-the-code)
+    - [Steering the BB-M8](#steering-the-bb-m8)
 
 
 ## Project overview
 ### About the BB-M8
+The BB-M8 is a spherical robot capable of moving across flat surfaces. This is achieved by means of an axis fitted with a pendulum, which can shift the centre of gravity, enabling the robot to navigate curves and maintain stability. The sphere also features a head, which is attached to the body by magnets and always remains on the upper surface of the sphere. The head is equipped with a camera and a rotating mechanism, allowing it to look in all directions. 
+
+The BB-M8 can be connected to any computer via Wi-Fi and controlled from there via an interface, where you can also view the live feed from the camera.
+
+Our BB-M8 is a replica of BB-8 from Star Wars.
+The body has a diameter of approximately 35 cm, so a bit smaller than the original one.
 
 
-<!-- TODO: 
-- Talk about the project 
-- Maybe add futur developpment possibilities
--->
 
 ### List of Materials
 Here is a exhausive list of all the elements needed to built the BB-M8. Note that you will need a 3D-printer with PETG filament to print some parts and a laser cutter.
@@ -89,8 +93,10 @@ Here is a exhausive list of all the elements needed to built the BB-M8. Note tha
 | Magnets for Bottom of Head | 14 mm diameter, 18 mm hight | 4 |
 | Wheels | 13 mm diameter | 4 |
 
-You will also need a **USB Isolator** to protect you computer and **data cables** to flash the code.
-<!-- TODO: Add any missing components-->
+- You will also need a **USB Isolator** to protect you computer and **data cables** to flash the code. 
+
+- To charge the LIPOs, you also need access to a **battery charging station**.
+- Screws, nuts, inserts, jumpers and other basic supply is also needed, as well as tape and glue.
 
 
 #### 3D print:
@@ -99,7 +105,7 @@ Here you can find all the [stl files](3D-Files/stl) that need to be printed with
 <!-- TODO: Uplode the stl file, and make a refernce to them -->
 
 #### Laser cut:
-The BB-M8 has also a few parts made of MDF. Here are the [dfx files](3D-Files/dfx). Note that you will need to use **different thicknesses** for the head and the body! Further information can be found in the corresponding section.
+The BB-M8 has also a few parts made of MDF. Here are the [dxf files](3D-Files/dxf). Note that you will need to use **different thicknesses** for the head and the body! Further information can be found in the corresponding section.
 <!-- TODO: Uplode the dfx file, and make a refernce to them -->
 
 
@@ -384,17 +390,30 @@ The sphere itself is 3D-printed in multiple smaller parts so that it can easily 
 | [junction with axis](3D-Files/stl/sphere_axisJunction.stl) | 2 |
 
 Once all parts are printed, glue the pieces together. It is important to keep **1/8 open** so that the inner body still can be placed inside. Also **do not** glue the caps to the rest of the sphere. 
-Note that the axis junction sits super tightly in the caps, so there is no need to glue int inside.
 
-<!-- TODO: Explaining the closing mechanism (right now it is just tape) -->
+#### Builting the sphere
+ 1. 3D-Print all the parts.
+ 2. Glue the pieces together with hot glue.
+    - It is important to keep **1/8 open** so that the inner body still can be placed inside.
+    - **Do not** glue the caps to the rest of the sphere. 
+ 
+3. Place the [main body](#main-body) inside and make sure that it has enough space.
+4. Put the second cap on top, close the last part and attach it with tape.
+
+
+
 
 <p align="center">
-    <img src="Images/Opend_sphere.jpeg" width="50%" />
+    <img src="Images/Sphere_open.jpeg" width="50%" />
 </p>
 
 <!-- TODO: Photo of closed sphere-->
 
 ## Controlling the BB-M8
+
+### Flashing the code
+
+### Steering the BB-M8
 
 
 
