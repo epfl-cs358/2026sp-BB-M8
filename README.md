@@ -34,7 +34,6 @@
       - [Building the mechanical part:](#building-the-mechanical-part-1)
     - [Main Body](#main-body)
       - [Building the mechanical part:](#building-the-mechanical-part-2)
-      - [Building the mechanical part](#building-the-mechanical-part-3)
     - [Sphere](#sphere)
   - [Controlling the BB-M8](#controlling-the-bb-m8)
 
@@ -231,12 +230,11 @@ Now the Axis is done, you'll have to disassemble it and reassemble it in the mai
 
 ### Main Body
 The main body is essentially a wooden box with a few holes to put a Servo, and has the importent duty to hold the axis, the nema, the poll for the head, and the swinger. It is the centerpiece of the project.  
-
-![Main Body illustration](Images/MainBody_illustration1.png)
-![Main Body illustration](Images/MainBody_illustration2.png)
-![Main Body illustration](Images/MainBody_illustration3.png)
-
-
+<p align="center">
+    <img src="Images/MainBody_illustration1.png" width="33%" />
+    <img src="Images/MainBody_illustration2.png" width="33%" />
+    <img src="Images/MainBody_illustration3.png" width="33%" />
+</p>
 
 #### Building the mechanical part:
 The main body is divided into multiple parts: the box, the IMU holder, the two nema holders, the stepper and its gearbox, the Servo, and the pin that holds the second arm of the swinger.
@@ -274,12 +272,6 @@ Now the Main Body is done, let's build the Swinger!
 
 
 
-#### Building the mechanical part 
-The parts to make are : the box, by laser cutting 8mm MDF; the IMU holder, 3d printed; the nema holder, 3d printed; the cap for the pin that holds the second arm of the swinger, 3d printed; and the poll for the head holder. 
-
-1. The box:
-- Use the following DXF file to cut it: [Large side](3D-Files/dxf/SideBoxLarge.dxf) x1, [Large side with servo](3D-Files/dxf/SideBoxLargeServoHole.dxf) x1, [Large side](3D-Files/dxf/SideBoxWithHoleForAxis.dxf) x2
-- then be carefull to glue it with 90° angles, 
 
 ### Sphere
 The sphere itself is 3D-printed in multiple smaller parts so that it can easily be printed on a normal sized Prusa. You need to print the following parts in PETG filament:
