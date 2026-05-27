@@ -17,14 +17,23 @@
 
 
 
-- [Project overview](#project-overview)
+- [2026sp-BB-M8](#2026sp-bb-m8)
+  - [Contributors](#contributors)
+  - [Table of Content](#table-of-content)
+  - [Project overview](#project-overview)
     - [About the BB-M8](#about-the-bb-m8)
     - [List of Materials](#list-of-materials)
-- [Built the BB-M8](#built-the-bb-m8)
+      - [Buy:](#buy)
+      - [3D print:](#3d-print)
+      - [Laser cut:](#laser-cut)
+  - [Built the BB-M8](#built-the-bb-m8)
     - [Head](#head)
-    - [Inner Body](#inner-body)
+      - [Building the mechanical part:](#building-the-mechanical-part)
+      - [Electronic Assembly of the head:](#electronic-assembly-of-the-head)
+    - [Main Body](#main-body)
+      - [Building the mechanical part](#building-the-mechanical-part-1)
     - [Sphere](#sphere)
-- [Controlling the BB-M8](#controlling-the-bb-m8)
+  - [Controlling the BB-M8](#controlling-the-bb-m8)
 
 
 ## Project overview
