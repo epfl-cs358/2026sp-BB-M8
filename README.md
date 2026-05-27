@@ -198,7 +198,6 @@ The parts to make are : the box, by laser cutting 8mm MDF; the IMU holder, 3d pr
 
 ### Sphere
 The sphere itself is 3D-printed in multiple smaller parts so that it can easily be printed on a normal sized Prusa. You need to print the following parts in PETG filament:
-
 | stl file | Quantity |
 |-----------|------------|
 | [caps](3D-Files/stl/Sphere_Cap.stl) | 2 |
@@ -208,15 +207,22 @@ The sphere itself is 3D-printed in multiple smaller parts so that it can easily 
 | [white parts](3D-Files/stl/Sphere_WhitePart.stl) | 6 |
 | [opening lid](3D-Files/stl/Sphere_Lid.stl) | 2 |
 | [lid surrounding](3D-Files/stl/Sphere_LidSurrounding.stl) | 2 |
-| [junction with axis](3D-Files/stl/sphere_axisJunction.stl) | 2 |
+
 
 Once all parts are printed, glue the pieces together. It is important to keep **1/8 open** so that the inner body still can be placed inside. Also **do not** glue the caps to the rest of the sphere. 
-Note that the axis junction sits super tightly in the caps, so there is no need to glue int inside.
 
-<!-- TODO: Explaining the closing mechanism (right now it is just tape) -->
+#### Builting the sphere
+- 1. 3D-Print all the parts.
+- 2. Glue the pieces together with hot glue.
+    - It is important to keep **1/8 open** so that the inner body still can be placed inside.
+    - **Do not** glue the caps to the rest of the sphere. 
+ 
+- 3. Place the [main body](#main-body) inside and make sure that it has enough space.
+- 4. Put the second cap on top, close the last part and attach it with tape.
+
 
 <p align="center">
-    <img src="Images/Opend_sphere.jpeg" width="50%" />
+    <img src="Images/Sphere_open.jpeg" width="50%" />
 </p>
 
 <!-- TODO: Photo of closed sphere-->
