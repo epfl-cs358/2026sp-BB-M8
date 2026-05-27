@@ -186,9 +186,7 @@ Now the head can be easily opend and closed with the magnets!
 ### Axis
 The Axis is the part that will transmitt the rotation from the stepper to the sphere. It is made of aluminum to make sure it doesn't bend, it also holds a gear that should be making the axis turn, 2 bearings that will hold the main body and avoid friction, 4 stop rings that will make sure the bearings stay in place, and the box doesn't slip out of the bearing, and finaly a junction in 2 parts that will be the attachement of the axis to the body.  
 
-<p align="center">
-  <img src="Images/Axis_Illustration.png" width="50%" />
-</p>
+![Axis Illustration](Images/Axis_Illustration.png)
 
 
 #### Building the mechanical part:
@@ -198,7 +196,7 @@ The axis is divided into different elements: the rode, the gear, the bearings, t
 1. Rode:
     - Get yourself a 310mm aluminum rode with diameter 10.
     - Drill holes and thread them with a lathe at the two ends of the rode for M2.5 Screws. The holes should be around 5mm deep
-    - Make a 10mm D shape at the 2 ends, and make sure the 2 ends have D shapes facing the exact same direction.
+    - Make a 10mm D shape that is 1mm deep at the 2 ends, and make sure the 2 ends have D shapes facing the exact same direction.
     - 🫟 The deepness of the holes, and the lenght of the D shapes can be a bit bigger and it will totally work. Just don't make them smaller.
     - 🫟 If you need visual support, [here](3D-Files/stl/Axis_Rode.stl) is an STL file, but DO NOT PRINT IT, it won't be resistant enough!  
 
