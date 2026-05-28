@@ -489,7 +489,7 @@ The web dashboard (`BBM8_head/data/index.html`) is stored on the ESP32-CAM's fil
 #### Dashboard overview
 
 **Camera feed**
-Click **FEED ON** in the top-right corner of the camera panel to start the live FPV stream. An artificial horizon indicator rotates in real time with the robot's roll angle.
+Click **FEED ON** in the top-right corner of the camera panel to start the live FPV stream.
 
 **Movement**
 Use the **virtual joystick** to drive BB-M8 — the Y axis controls forward/backward speed, the X axis controls steering. The **arrow keys** on your keyboard work as well.
@@ -503,8 +503,5 @@ Adjust Kp, Ki, Kd in the right panel and click **Apply Gains** to send them to t
 **Target Roll / Target Speed**
 Send a fixed value directly to the robot independently of the joystick. Useful for calibration.
 
-**Debug toggles**
-The **Debug** panel has two toggles to independently enable/disable the servo (steering) and the stepper (drive). Useful to test each actuator in isolation once everything is assembled.
-
 **Safety**
-The **STOP** button immediately halts the robot. Click **RESUME** to re-enable.
+The **STOP** button immediately halts the robot. Click **RESUME** to re-enable.　The robot starts in STOPPED mode for safety reasons.
