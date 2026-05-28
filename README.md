@@ -423,7 +423,75 @@ Once all parts are printed, glue the pieces together. It is important to keep **
 
 ### Flashing the code
 
+You will need [PlatformIO](https://platformio.org/) installed in VS Code to flash both microcontrollers.
+
+#### Body (Wemos D1 R32 ESP32)
+
+The Wemos has a native USB port — no adapter needed.
+
+1. Connect the Wemos to your computer via USB.
+2. Open the `BBM8_body` folder in VS Code with PlatformIO.
+3. Click **Upload** or run `pio run --target upload` in the terminal.
+
+#### Head (ESP32-CAM)
+
+The ESP32-CAM has no native USB port. You need a **FTDI FT232R USB-to-TTL adapter** to flash it.
+
+**Wiring (FTDI → ESP32-CAM):**
+
+| FTDI | ESP32-CAM |
+|------|-----------|
+| TX   | U0R (RX)  |
+| RX   | U0T (TX)  |
+| 5V   | 5V        |
+| GND  | GND       |
+
+Also connect **IO0 → GND** on the ESP32-CAM to enable flash mode. **Remove this wire after flashing.**
+
+1. Wire the FTDI to the ESP32-CAM as above.
+2. Open the `BBM8_head` folder in VS Code with PlatformIO.
+3. Click **Upload**. When you see `Connecting......` in the terminal, press the **RST** button on the ESP32-CAM.
+4. Once the upload is complete, disconnect IO0 from GND and press RST again.
+
+#### Uploading the dashboard (SPIFFS)
+
+The web dashboard (`BBM8_head/data/index.html`) is stored on the ESP32-CAM's filesystem and must be uploaded separately from the code.
+
+1. Keep the FTDI connected.
+2. In VS Code with PlatformIO, run **Platform → Upload Filesystem Image**, or run `pio run --target uploadfs` in the terminal.
+3. The dashboard will now be served at `http://192.168.4.1` every time the head powers on.
+
+---
+
 ### Steering the BB-M8
 
+#### Connecting
+
+1. Power on the BB-M8.
+2. On your computer or phone, connect to the Wi-Fi network **`BBM8`** (password: `starwars`).
+3. Open a browser and navigate to **`http://192.168.4.1`**.
+
+#### Dashboard overview
+
+**Camera feed**
+Click **FEED ON** in the top-right corner of the camera panel to start the live FPV stream. An artificial horizon indicator rotates in real time with the robot's roll angle.
+
+**Movement**
+Use the **virtual joystick** to drive BB-M8 — Y axis controls forward/backward speed, X axis controls steering. The **arrow keys** on your keyboard work as well.
+
+**Telemetry**
+The bottom panel shows 7 live graphs updated at 10 Hz: Roll, Pitch, Drive Speed, PID Output, PID Error, Integral and Derivative.
+
+**PID tuning**
+Adjust Kp, Ki, Kd in the right panel and click **Apply Gains** to send them to the robot without reflashing. Starting values: Kp = 0.9, Ki = 0.05, Kd = 0.1.
+
+**Target Roll / Target Speed**
+Send a fixed value directly to the robot independently of the joystick. Useful for calibration.
+
+**Debug toggles**
+The **Debug** panel has two toggles to independently enable/disable the servo (steering) and the stepper (drive). Useful to test each actuator in isolation once everything is assembled.
+
+**Safety**
+The **STOP** button immediately halts the robot. Click **RESUME** to re-enable.
 
 
