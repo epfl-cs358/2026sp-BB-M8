@@ -202,7 +202,7 @@ Now the head can be easily opened and closed with the magnets!
 
 
 <p align="center">
-    <img src="Images/Head_scematics.png"  />
+    <img src="Images/Head_scematics.png" width="80%" />
 </p>
 
 
@@ -344,6 +344,10 @@ The Swinger is essentially a rectangular MDF sheet with holes to screw all the e
    - 🫟 Remember that the LiPo is right under the electronic components, therefore, there shouldn't be any screws sticking too much out to avoid damaging the LiPo.
 
 #### Electronic Assembly of the swinger:
+<p align="center">
+    <img src="Images/Swinger_scematics.png" width="80%" />
+   </p>
+
 
 The swinger hosts all the body electronics. Connect the components as follows:
 
@@ -437,7 +441,7 @@ Once all parts are printed, glue the pieces together. It is important to keep **
 #### Builting the sphere
  1. 3D-Print all the parts.
  2. Glue the pieces together with hot glue.
-    - It is important to keep **1/8 open** so that the inner body still can be placed inside.
+    - It is important to keep **1/4 open** so that the inner body still can be placed inside.
     - **Do not** glue the caps to the rest of the sphere. 
  
 3. Place the [main body](#main-body) inside and make sure that it has enough space.
@@ -450,7 +454,6 @@ Once all parts are printed, glue the pieces together. It is important to keep **
     <img src="Images/Sphere_open.jpeg" width="50%" />
 </p>
 
-<!-- TODO: Photo of closed sphere-->
 
 ## Controlling the BB-M8
 
