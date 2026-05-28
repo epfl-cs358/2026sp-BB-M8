@@ -210,6 +210,7 @@ The Axis is the part that will transmit the rotation from the stepper to the sph
 
 ![Axis Illustration](Images/Axis_illustration.png)
 
+https://github.com/user-attachments/assets/9146e50d-00f2-4c6c-8933-5cecaacd3a80
 
 #### Building the mechanical part:
 The axis is divided into different elements: the rod, the gear, the bearings, the stop rings, the first junction, and the second junction. 
@@ -260,6 +261,8 @@ The main body is essentially a wooden box with a few holes to put a Servo, and h
     <img src="Images/MainBody_illustration3.png" width="33%" />
 </p>
 
+https://github.com/user-attachments/assets/4a70eb73-42a0-409a-afb2-720c48bfd937
+
 #### Building the mechanical part:
 The main body is divided into multiple parts: the box, the IMU holder, the two NEMA holders, the stepper and its gearbox, the gear on the gearbox shaft, the Servo, and the pin that holds the second arm of the swinger.
 
@@ -306,6 +309,8 @@ The Swinger is a very technical part; it'll hold all the electronics, and swing 
     <img src="Images/Swinger_illustration3.png" width="33%" />
     <img src="Images/Swinger_illustration2.png" width="33%" />
 </p>
+
+https://github.com/user-attachments/assets/8d093857-c81f-4bc1-969b-20ae95724053
 
 #### Building the mechanical part:
 The Swinger is essentially a rectangular MDF sheet with holes to screw all the electronics, velcro under to stick the LiPo, and arms to connect to the main body. It will hold the BMS inside a BMS box, the 2 buck converters, the ESP32, the NEMA's driver, and some wago.
@@ -402,6 +407,9 @@ You now have the whole interior body. All that's left is to put it inside the sp
 
 
 ### Sphere
+
+https://github.com/user-attachments/assets/a65b6fe3-ab26-49d3-bca7-5c9b17b3753b
+
 The sphere itself is 3D-printed in multiple smaller parts so that it can easily be printed on a normal sized Prusa. You need to print the following parts in PETG filament:
 
 | stl file | Quantity |
