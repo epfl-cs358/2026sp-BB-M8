@@ -116,6 +116,11 @@ Here are the instruction for building the BB-M8. Note that points having 🫟 in
 ### Head
 <!-- TODO: Foto of the entire head -->
 <!-- TODO: Describtion of the head and its functioning -->
+
+
+
+https://github.com/user-attachments/assets/d43b33c3-5c80-41d6-bc25-aa63da8808fc
+
 The head contains the ESP32 with a camera and has an internal rotation mechanism, to make it turn. An other important aspect of the head is it's iconic look and it's size relative to the sphere, that makes our BB-M8 resemble the original one. 
 
 <p align="center">
