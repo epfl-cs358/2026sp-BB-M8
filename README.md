@@ -339,6 +339,10 @@ The Swinger is essentially a rectangular MDF sheet with holes to screw all the e
    - 🫟 Remember that the LiPo is right under the electronic components, therefore, there shouldn't be any screws sticking too much out to avoid damaging the LiPo.
 
 #### Electronic Assembly of the swinger:
+<p align="center">
+    <img src="Images/Swinger_scematics.png" width="80%" />
+   </p>
+
 
 The swinger hosts all the body electronics. Connect the components as follows:
 
