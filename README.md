@@ -433,7 +433,7 @@ Once all parts are printed, glue the pieces together. It is important to keep **
 #### Builting the sphere
  1. 3D-Print all the parts.
  2. Glue the pieces together with hot glue.
-    - It is important to keep **1/8 open** so that the inner body still can be placed inside.
+    - It is important to keep **1/4 open** so that the inner body still can be placed inside.
     - **Do not** glue the caps to the rest of the sphere. 
  
 3. Place the [main body](#main-body) inside and make sure that it has enough space.
