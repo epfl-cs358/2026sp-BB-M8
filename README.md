@@ -387,9 +387,8 @@ The sphere itself is 3D-printed in multiple smaller parts so that it can easily 
 | [white parts](3D-Files/stl/Sphere_WhitePart.stl) | 6 |
 | [opening lid](3D-Files/stl/Sphere_Lid.stl) | 2 |
 | [lid surrounding](3D-Files/stl/Sphere_LidSurrounding.stl) | 2 |
-| [junction with axis](3D-Files/stl/sphere_axisJunction.stl) | 2 |
 
-Once all parts are printed, glue the pieces together. It is important to keep **1/8 open** so that the inner body still can be placed inside. Also **do not** glue the caps to the rest of the sphere. 
+Once all parts are printed, glue the pieces together. It is important to keep **1/4 open** so that the inner body still can be placed inside. Also **do not** glue the caps to the rest of the sphere. 
 
 #### Builting the sphere
  1. 3D-Print all the parts.
