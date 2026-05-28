@@ -1,6 +1,7 @@
 # 2026sp-BB-M8
-<!-- TODO: Picture/Video of the final BB-M8 -->
-
+<p align="center">
+  <img src="Images/BBM8_IntheBush.JPG" width="50%" />
+</p>
 
 ## Contributors
 
@@ -43,6 +44,7 @@
       - [Building the mechanical part:](#building-the-mechanical-part-5)
       - [Electronic Assembly of the interior body:](#electronic-assembly-of-the-interior-body)
     - [Sphere](#sphere)
+      - [Builting the sphere](#builting-the-sphere)
   - [Controlling the BB-M8](#controlling-the-bb-m8)
     - [Flashing the code](#flashing-the-code)
     - [Steering the BB-M8](#steering-the-bb-m8)
