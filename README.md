@@ -113,6 +113,8 @@ The BB-M8 has also a few parts made of MDF. Here are the [dxf files](3D-Files/dx
 ## Built the BB-M8
 Here are the instruction for building the BB-M8. Note that points having 🫟 in front of it, are further suggestens to make it cleaner and/or to remove unessecary holes, for example, that are no longer needed.
 
+Here you can find the [step file](3D-Files\FullAssembly.step) of the BB-M8.
+
 ### Head
 <!-- TODO: Foto of the entire head -->
 <!-- TODO: Describtion of the head and its functioning -->
@@ -196,7 +198,7 @@ Now the head can be easily opend and closed with the magnets!
 
 
 <p align="center">
-    <img src="2026sp-BB-M8/Images/Head_scematics.png" width="50%" />
+    <img src="Images/Head_scematics.png"  />
 </p>
 
 
