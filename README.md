@@ -47,7 +47,12 @@
       - [Builting the sphere](#builting-the-sphere)
   - [Controlling the BB-M8](#controlling-the-bb-m8)
     - [Flashing the code](#flashing-the-code)
+      - [Body (Wemos D1 R32 ESP32)](#body-wemos-d1-r32-esp32)
+      - [Head (ESP32-CAM)](#head-esp32-cam)
+      - [Uploading the dashboard (SPIFFS)](#uploading-the-dashboard-spiffs)
     - [Steering the BB-M8](#steering-the-bb-m8)
+      - [Connecting](#connecting)
+      - [Dashboard overview](#dashboard-overview)
 
 
 ## Project overview
@@ -400,8 +405,11 @@ Now that you've successfully built each part of the interior of the body success
    - Connect the Servo to its dedicated wires.
 2. IMU
    - Connect the IMU to its dedicated wires.
-3. NEMA 
+3. NEMA
    - Connect the NEMA to its dedicated wires.
+4. Cable management
+   - Make sure the electronics in the swinger doesn't touch the gear on the shaft of the gearbox at any position of the swinger  
+  
 
 You now have the whole interior body. All that's left is to put it inside the sphere, and... voilà!
 
