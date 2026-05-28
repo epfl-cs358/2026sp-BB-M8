@@ -193,7 +193,11 @@ Now the head can be easily opend and closed with the magnets!
 <!-- TODO: Continue-->
 
 #### Electronic Assembly of the head:
-<!-- TODO: Add scema of the electronic assembly !!!!!!! add the BMS -->
+
+
+<p align="center">
+    <img src="2026sp-BB-M8/Images/Head_scematics.png" width="50%" />
+</p>
 
 
 1. Calibrate the **buck convertor to 5V**.
