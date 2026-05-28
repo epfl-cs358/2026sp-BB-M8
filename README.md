@@ -197,7 +197,7 @@ Now the head can be easily opened and closed with the magnets!
 
 
 <p align="center">
-    <img src="Images/Head_scematics.png"  />
+    <img src="Images/Head_scematics.png" width="80%" />
 </p>
 
 
@@ -446,7 +446,6 @@ Once all parts are printed, glue the pieces together. It is important to keep **
     <img src="Images/Sphere_open.jpeg" width="50%" />
 </p>
 
-<!-- TODO: Photo of closed sphere-->
 
 ## Controlling the BB-M8
 
